@@ -699,8 +699,1113 @@
 </section>
 
 
+<!-- ============================================================
+     PART 2 — GCP DATA ENGINEERING LANDSCAPE
+============================================================ -->
+
+<div style="max-width:1200px;margin:0 auto 2rem;">
+  <div style="border-top:2px solid var(--border);margin:2rem 0;"></div>
+  <h1 style="text-align:center;font-size:2rem;background:linear-gradient(135deg,#f59e0b,#f87171,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:0.4rem;">
+    GCP Data Engineering — Full Service Landscape
+  </h1>
+  <p style="text-align:center;color:var(--muted);margin-bottom:2.5rem;">Data Ingestion · Processing · Storage · Orchestration · Monitoring — every service explained</p>
+
+  <!-- SUB-NAV -->
+  <nav style="display:flex;flex-wrap:wrap;gap:0.6rem;justify-content:center;margin-bottom:3rem;">
+    <a href="#ingestion"   style="padding:0.4rem 1rem;border-radius:999px;border:1px solid var(--border);color:var(--text);text-decoration:none;font-size:0.85rem;">📥 Ingestion</a>
+    <a href="#proc-batch"  style="padding:0.4rem 1rem;border-radius:999px;border:1px solid var(--border);color:var(--text);text-decoration:none;font-size:0.85rem;">⚙️ Batch &amp; Stream</a>
+    <a href="#stream"      style="padding:0.4rem 1rem;border-radius:999px;border:1px solid var(--border);color:var(--text);text-decoration:none;font-size:0.85rem;">🌊 Stream Processing</a>
+    <a href="#storage"     style="padding:0.4rem 1rem;border-radius:999px;border:1px solid var(--border);color:var(--text);text-decoration:none;font-size:0.85rem;">🗄️ Storage</a>
+    <a href="#orchestrate" style="padding:0.4rem 1rem;border-radius:999px;border:1px solid var(--border);color:var(--text);text-decoration:none;font-size:0.85rem;">🎼 Orchestration</a>
+    <a href="#monitor"     style="padding:0.4rem 1rem;border-radius:999px;border:1px solid var(--border);color:var(--text);text-decoration:none;font-size:0.85rem;">📊 Monitoring</a>
+  </nav>
+</div>
+
+
+<!-- ==========================
+     1. DATA INGESTION
+========================== -->
+<section class="section" id="ingestion">
+  <h2 class="section-title" style="border-color:#f59e0b;">📥 Data Ingestion</h2>
+  <p style="color:var(--muted);margin-bottom:1.2rem;font-size:0.93rem;">
+    <strong style="color:var(--text);">Data Ingestion</strong> = the process of collecting and importing raw data from various sources into a GCP storage or processing system. The first step in any data pipeline — before you can process or analyse data, you must bring it in.
+  </p>
+
+  <div class="table-wrap" style="margin-bottom:2rem;">
+    <table>
+      <thead><tr><th>GCP Service</th><th>Description / Use Case</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Cloud Pub/Sub</strong></td>
+          <td>Real-time messaging, decouples data producers and consumers</td>
+        </tr>
+        <tr>
+          <td><strong>Cloud Storage (GCS)</strong></td>
+          <td>Store raw files (CSV, JSON, Parquet) for processing</td>
+        </tr>
+        <tr>
+          <td><strong>BigQuery Data Transfer Service</strong></td>
+          <td>Load data from external SaaS (Google Ads, S3, etc.)</td>
+        </tr>
+        <tr>
+          <td><strong>Storage Transfer Service</strong></td>
+          <td>Move data from on-prem or AWS to GCS</td>
+        </tr>
+        <tr>
+          <td><strong>Cloud Functions</strong></td>
+          <td>Event-triggered ingestion (e.g., new file in GCS)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="detail-block" style="border-color:#f59e0b22;">
+    <h3 style="color:#f59e0b;">Cloud Pub/Sub — in Ingestion context</h3>
+    <ul>
+      <li><strong>Real-time messaging</strong> — Pub/Sub acts as the entry point for high-velocity event streams. IoT devices, mobile apps, web servers all publish events here continuously.</li>
+      <li><strong>Decouples producers and consumers</strong> — The source system (producer) doesn't know who will consume the data. It just publishes to a topic. Downstream services (Dataflow, BigQuery, Cloud Functions) subscribe independently.</li>
+      <li><strong>Why it's an ingestion tool</strong> — It buffers and delivers raw data reliably at any scale (millions of messages/second), acting as the "front door" to your data platform.</li>
+    </ul>
+
+    <h3 style="color:#f59e0b;">Cloud Storage (GCS) — Google Cloud Storage</h3>
+    <ul>
+      <li><strong>GCS</strong> = Google Cloud Storage. A globally distributed object storage service. "Object" = any file (CSV, JSON, Parquet, Avro, images, logs). Unlike a file system, objects are accessed by URL, not file path.</li>
+      <li><strong>Raw files</strong> — Unprocessed data as-is from the source. CSV = Comma-Separated Values (spreadsheet-like). JSON = JavaScript Object Notation (nested key-value pairs). Parquet = columnar binary format optimised for analytics (much smaller and faster than CSV for queries).</li>
+      <li><strong>For processing</strong> — GCS is the staging area. Dataflow, Dataproc, BigQuery all read from GCS. It is the data lake landing zone.</li>
+      <li><strong>Storage classes</strong> — Standard (hot data), Nearline (access &lt;1/month), Coldline (access &lt;1/quarter), Archive (rarely accessed). Pay less for colder tiers.</li>
+    </ul>
+
+    <h3 style="color:#f59e0b;">BigQuery Data Transfer Service (DTS)</h3>
+    <ul>
+      <li><strong>BigQuery</strong> = GCP's serverless data warehouse (covered below in detail).</li>
+      <li><strong>Data Transfer Service</strong> — A managed connector that automatically schedules and runs data loads from external sources into BigQuery tables.</li>
+      <li><strong>External SaaS</strong> — Software-as-a-Service products outside GCP. Examples: Google Ads (advertising data), Google Analytics (web traffic), S3 (Amazon Simple Storage Service — AWS's file storage). No code needed; configure a transfer job in the console.</li>
+      <li><strong>Why it matters</strong> — Without DTS, you'd write custom scripts to call each SaaS API, handle pagination, auth tokens, retries, and schema mapping. DTS does all of this for you on a schedule.</li>
+    </ul>
+
+    <h3 style="color:#f59e0b;">Storage Transfer Service</h3>
+    <ul>
+      <li><strong>On-prem</strong> = On-premises. Your own data centres or office servers (not cloud). Data living here needs to be migrated to GCP.</li>
+      <li><strong>AWS</strong> = Amazon Web Services — a competing cloud provider. If you're migrating from AWS to GCP, Storage Transfer Service moves your S3 data to GCS automatically.</li>
+      <li><strong>To GCS</strong> — Destination is always Cloud Storage. From there, other GCP services can process it.</li>
+      <li><strong>Difference from DTS</strong> — DTS is for SaaS data into BigQuery. Storage Transfer is for bulk file/object migration into GCS from other clouds or on-prem file servers.</li>
+    </ul>
+
+    <h3 style="color:#f59e0b;">Cloud Functions — Event-triggered ingestion</h3>
+    <ul>
+      <li><strong>Cloud Functions</strong> — Serverless Functions-as-a-Service (FaaS). Write a small function; GCP runs it in response to an event. No server to manage. Pay per invocation (100ms billing granularity).</li>
+      <li><strong>Event-triggered</strong> — A function runs only when a specific event fires. Example events: a new file uploaded to GCS, a new Pub/Sub message, an HTTP request, a Firestore document change.</li>
+      <li><strong>Ingestion example</strong> — "new file in GCS" triggers a function that reads the file, validates it, transforms it, and loads it into BigQuery or Pub/Sub. Zero manual intervention.</li>
+    </ul>
+  </div>
+</section>
+
+
+<!-- ==========================
+     2. DATA PROCESSING (BATCH & STREAM)
+========================== -->
+<section class="section" id="proc-batch">
+  <h2 class="section-title" style="border-color:#3ecf8e;">⚙️ Data Processing — Batch &amp; Stream</h2>
+  <p style="color:var(--muted);margin-bottom:1.2rem;font-size:0.93rem;">
+    <strong style="color:var(--text);">Data Processing</strong> = transforming raw ingested data into clean, structured, analytics-ready data. Involves filtering, aggregating, joining, enriching, and writing to a destination.
+  </p>
+
+  <div class="table-wrap" style="margin-bottom:2rem;">
+    <table>
+      <thead><tr><th>GCP Service</th><th>Description / Use Case</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Dataflow</strong></td><td>Serverless stream and batch processing (Apache Beam-based)</td></tr>
+        <tr><td><strong>Dataproc</strong></td><td>Managed Spark/Hadoop for ETL, ML, analytics</td></tr>
+        <tr><td><strong>BigQuery</strong></td><td>Serverless SQL-based analytics; supports ELT</td></tr>
+        <tr><td><strong>Cloud Composer</strong></td><td>Orchestrate ETL workflows using Apache Airflow</td></tr>
+        <tr><td><strong>Cloud Functions</strong></td><td>Lightweight transformation scripts (event-driven)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="detail-block" style="border-color:#3ecf8e22;">
+    <h3 style="color:#3ecf8e;">BigQuery — Serverless SQL analytics + ELT</h3>
+    <ul>
+      <li><strong>BigQuery</strong> — GCP's fully managed, serverless, petabyte-scale data warehouse. Stores structured data in columnar format and allows SQL queries across massive datasets in seconds.</li>
+      <li><strong>Serverless SQL-based analytics</strong> — No cluster to provision. Write a SQL SELECT; BigQuery distributes the query across thousands of nodes automatically and returns results. Bill per TB of data scanned.</li>
+      <li><strong>ELT</strong> = Extract, Load, Transform. The modern pattern enabled by powerful warehouses like BigQuery:
+        <ul>
+          <li><strong>Extract</strong> — Pull raw data from source.</li>
+          <li><strong>Load</strong> — Load raw data directly into BigQuery (no transformation first).</li>
+          <li><strong>Transform</strong> — Use SQL inside BigQuery (or dbt) to transform. Because BigQuery is so fast and cheap, transforming inside the warehouse is now viable.</li>
+        </ul>
+      </li>
+      <li><strong>ELT vs ETL</strong> — ETL (Dataflow approach) transforms before loading. ELT (BigQuery approach) loads raw then transforms inside. ELT is preferred when storage is cheap and compute (SQL) is powerful.</li>
+    </ul>
+
+    <h3 style="color:#3ecf8e;">Cloud Composer — Orchestrate ETL workflows</h3>
+    <ul>
+      <li>Composer doesn't process data itself — it sequences other services. Example: schedule Dataflow job → wait for it to finish → run BigQuery SQL transformation → export result to GCS.</li>
+      <li><strong>Apache Airflow</strong> — The underlying engine. Write Python DAGs (Directed Acyclic Graphs) that define task order, dependencies, retries, and alerts.</li>
+    </ul>
+
+    <h3 style="color:#3ecf8e;">Cloud Functions — Lightweight transformation scripts</h3>
+    <ul>
+      <li><strong>Lightweight</strong> — Small, quick operations (not heavy multi-hour batch jobs). Example: parse 10 JSON records, format a date field, write to Firestore.</li>
+      <li><strong>Transformation scripts</strong> — Code that changes the shape or format of data. Rename fields, convert types, validate values, enrich with API lookups.</li>
+      <li><strong>Event-driven</strong> — Runs in response to triggers (Pub/Sub message, GCS file, HTTP call). Perfect for microservices-style data pipelines.</li>
+    </ul>
+  </div>
+</section>
+
+
+<!-- ==========================
+     3. STREAM PROCESSING
+========================== -->
+<section class="section" id="stream">
+  <h2 class="section-title" style="border-color:#4f9cf9;">🌊 Stream Processing</h2>
+  <p style="color:var(--muted);margin-bottom:1.2rem;font-size:0.93rem;">
+    <strong style="color:var(--text);">Stream Processing</strong> = processing data continuously as it arrives, in real time or near-real-time. No waiting for a batch to accumulate — each event is handled the moment it lands.
+  </p>
+
+  <div class="table-wrap" style="margin-bottom:2rem;">
+    <table>
+      <thead><tr><th>GCP Service</th><th>Description / Use Case</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Cloud Pub/Sub</strong></td><td>Ingest and deliver streaming data</td></tr>
+        <tr><td><strong>Dataflow</strong></td><td>Transform and process streaming data from Pub/Sub</td></tr>
+        <tr><td><strong>BigQuery Streaming</strong></td><td>Insert data into BigQuery in real-time</td></tr>
+        <tr><td><strong>Datastream</strong></td><td>Real-time Change Data Capture (CDC) from DBs to BigQuery</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="detail-block" style="border-color:#4f9cf922;">
+    <h3 style="color:#4f9cf9;">Cloud Pub/Sub — Ingest and deliver streaming data</h3>
+    <ul>
+      <li>In the streaming context, Pub/Sub is the universal intake valve. All real-time events (IoT sensors, app events, log lines) land here first.</li>
+      <li>Delivers each message to all subscribers within milliseconds. Durable — messages stored up to 7 days if a subscriber is slow.</li>
+      <li>Acts as the buffer between fast producers and potentially slower downstream processors (like Dataflow).</li>
+    </ul>
+
+    <h3 style="color:#4f9cf9;">Dataflow — Transform and process streaming data from Pub/Sub</h3>
+    <ul>
+      <li>The classic GCP streaming architecture: <strong>Pub/Sub → Dataflow → BigQuery</strong>.</li>
+      <li>Dataflow reads from a Pub/Sub subscription, applies transformations (filter, aggregate with windowing, enrich via lookups), and writes results to BigQuery or GCS.</li>
+      <li><strong>Windowing</strong> — In streaming, you can't wait for "all" data (it's infinite). Windows break the stream into finite chunks: Fixed window (every 5 min), Sliding window (last 10 min, updated every 1 min), Session window (group by user inactivity gap).</li>
+      <li><strong>Watermarks</strong> — Dataflow tracks how far behind real time the data is. The watermark tells Dataflow when it's safe to close a window and emit results, even if some late data may still arrive.</li>
+    </ul>
+
+    <h3 style="color:#4f9cf9;">BigQuery Streaming — Insert data in real-time</h3>
+    <ul>
+      <li><strong>BigQuery Streaming API</strong> — Allows inserting individual rows into BigQuery tables immediately (not waiting for a batch load job). Rows are queryable within seconds of insertion.</li>
+      <li><strong>Use case</strong> — Real-time dashboards that query BigQuery. If you insert every transaction as it happens, your dashboard shows up-to-the-minute data.</li>
+      <li><strong>Cost note</strong> — Streaming inserts are more expensive per byte than batch loads. Use when you truly need real-time queryability; otherwise prefer batch load jobs.</li>
+      <li><strong>BigQuery Storage Write API</strong> — The newer, more efficient replacement for the legacy streaming API. Better cost, exactly-once semantics, and higher throughput.</li>
+    </ul>
+
+    <h3 style="color:#4f9cf9;">Datastream — Change Data Capture (CDC)</h3>
+    <ul>
+      <li><strong>Datastream</strong> — A serverless Change Data Capture (CDC) and replication service. It continuously reads changes from operational databases and replicates them to BigQuery or GCS.</li>
+      <li><strong>CDC</strong> = Change Data Capture. Instead of re-reading the entire database every time (expensive), CDC watches the database's transaction log (binary log in MySQL, WAL in PostgreSQL) and captures only the rows that changed: INSERTs, UPDATEs, DELETEs.</li>
+      <li><strong>DBs → BigQuery</strong> — Source databases: MySQL, PostgreSQL, Oracle, SQL Server, AlloyDB. Destination: BigQuery (for analytics), or GCS (for archival or further processing with Dataflow).</li>
+      <li><strong>Why CDC?</strong> — Keeps your data warehouse always in sync with your operational database, in near-real-time, without hammering the source DB with full scans.</li>
+    </ul>
+  </div>
+</section>
+
+
+<!-- ==========================
+     4. DATA STORAGE
+========================== -->
+<section class="section" id="storage">
+  <h2 class="section-title" style="border-color:#a78bfa;">🗄️ Data Storage</h2>
+  <p style="color:var(--muted);margin-bottom:1.2rem;font-size:0.93rem;">
+    <strong style="color:var(--text);">Data Storage</strong> = where data lives persistently in GCP. Different storage services serve different access patterns — choose based on structure, latency, scale, and query type.
+  </p>
+
+  <div class="table-wrap" style="margin-bottom:2rem;">
+    <table>
+      <thead><tr><th>GCP Service</th><th>Description / Use Case</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Cloud Storage</strong></td><td>Store raw/staged data (data lake layer)</td></tr>
+        <tr><td><strong>BigQuery</strong></td><td>Serverless enterprise data warehouse</td></tr>
+        <tr><td><strong>Cloud SQL</strong></td><td>Managed relational DB (MySQL, PostgreSQL, SQL Server)</td></tr>
+        <tr><td><strong>Cloud Spanner</strong></td><td>Scalable, strongly consistent SQL database</td></tr>
+        <tr><td><strong>Bigtable</strong></td><td>High-performance NoSQL DB for time-series or IoT data</td></tr>
+        <tr><td><strong>Firestore</strong></td><td>Serverless NoSQL document DB (for apps or metadata storage)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="detail-block" style="border-color:#a78bfa22;">
+    <h3 style="color:#a78bfa;">Cloud Storage — Data Lake Layer</h3>
+    <ul>
+      <li><strong>Data lake</strong> — A storage repository that holds a vast amount of raw data in its native format until needed. Unlike a data warehouse (structured, schema-on-write), a data lake stores anything (structured, semi-structured, unstructured) without imposing a schema upfront.</li>
+      <li><strong>Raw/staged data</strong> — Raw = exactly as received from source (no transformation). Staged = partially cleaned but not yet loaded into final destination.</li>
+      <li>Unlimited storage, 99.999999999% (11 nines) durability. Cheap — ~$0.02/GB/month for standard tier.</li>
+    </ul>
+
+    <h3 style="color:#a78bfa;">BigQuery — Enterprise Data Warehouse</h3>
+    <ul>
+      <li><strong>Data warehouse</strong> — A system for storing and querying large volumes of historical, structured data for analytics and business intelligence (BI). Schema-on-write (define structure before loading). Optimised for complex analytical queries, not for transactional updates.</li>
+      <li><strong>Enterprise</strong> — Designed for business-scale workloads: petabytes of data, hundreds of concurrent analysts, role-based access control, audit logs, compliance features.</li>
+      <li><strong>Serverless</strong> — No clusters to manage. Query petabytes; BigQuery auto-distributes across its internal computing infrastructure.</li>
+      <li>Columnar storage — data stored column-by-column (not row-by-row). Analytics queries that read a few columns from millions of rows are vastly faster and cheaper.</li>
+    </ul>
+
+    <h3 style="color:#a78bfa;">Cloud SQL — Managed Relational DB</h3>
+    <ul>
+      <li><strong>Relational DB</strong> — Stores data in tables with rows and columns. Relationships between tables via foreign keys. ACID transactions (Atomicity, Consistency, Isolation, Durability). SQL query language.</li>
+      <li><strong>Managed</strong> — GCP handles: installation, OS updates, backups (automated daily), failover replicas (high availability), read replicas (scale reads). You still manage schema and query optimisation.</li>
+      <li><strong>MySQL</strong> — World's most popular open-source RDBMS. Used by web apps, WordPress, etc. Cloud SQL supports MySQL 5.7 and 8.0.</li>
+      <li><strong>PostgreSQL</strong> — Feature-rich open-source RDBMS. Supports JSON, arrays, full-text search, extensions. Preferred by engineers for its standards compliance.</li>
+      <li><strong>SQL Server</strong> — Microsoft's commercial RDBMS. Used in enterprise Windows environments. Cloud SQL supports SQL Server 2017, 2019, 2022.</li>
+      <li><strong>When to use</strong> — Operational/transactional workloads: web app backends, e-commerce order systems, CRM. NOT for analytical queries over billions of rows — use BigQuery for that.</li>
+    </ul>
+
+    <h3 style="color:#a78bfa;">Cloud Spanner — Scalable, Strongly Consistent SQL</h3>
+    <ul>
+      <li><strong>Spanner</strong> — Google's globally distributed, horizontally scalable relational database. It combines the scalability of NoSQL with the ACID guarantees of a traditional RDBMS — something that was theoretically considered impossible (Spanner defied CAP theorem constraints in practice).</li>
+      <li><strong>Scalable</strong> — Horizontally scales to millions of transactions per second without performance degradation. Add more nodes to increase capacity with no downtime.</li>
+      <li><strong>Strongly consistent</strong> — All reads return the most recent write. No "eventual consistency" lag. Even across global regions, reads are consistent. Uses TrueTime (Google's atomic clock infrastructure) to achieve this.</li>
+      <li><strong>When to use</strong> — Financial systems, gaming leaderboards, global inventory systems — anything needing relational semantics at massive global scale (too big for Cloud SQL, needs SQL unlike Bigtable).</li>
+    </ul>
+
+    <h3 style="color:#a78bfa;">Bigtable — NoSQL for Time-Series / IoT</h3>
+    <ul>
+      <li><strong>Bigtable</strong> — Google's wide-column NoSQL database. The database that powers Google Search index, Gmail, and Google Maps. Open-source equivalent: Apache HBase.</li>
+      <li><strong>NoSQL</strong> = Not Only SQL. Schema-less or flexible-schema databases. No rigid table structure. Trade ACID transactions for horizontal scalability and performance.</li>
+      <li><strong>Wide-column</strong> — Data is stored in rows identified by a row key. Each row can have millions of columns. Columns are grouped into column families. Very sparse — most columns in a row can be empty without wasting space.</li>
+      <li><strong>Time-series data</strong> — Data points indexed by timestamp. Example: a temperature sensor recording every second. Row key = sensorID + timestamp. Very efficient for range scans by time.</li>
+      <li><strong>IoT data</strong> = Internet of Things. Millions of sensors, devices, machines sending continuous readings. Bigtable handles ingestion at millions of writes per second with single-digit millisecond latency.</li>
+      <li><strong>High-performance</strong> — Single-digit millisecond read/write latency. Scales to petabytes. Consistent performance as data grows.</li>
+    </ul>
+
+    <h3 style="color:#a78bfa;">Firestore — NoSQL Document DB</h3>
+    <ul>
+      <li><strong>Firestore</strong> — Google's serverless, fully managed document database. Part of Firebase (Google's mobile/web app development platform). Native mobile and web SDKs with real-time sync.</li>
+      <li><strong>Document DB</strong> — Data is stored as documents (similar to JSON objects). Documents are grouped into collections. No fixed schema — each document in a collection can have different fields. Flexible for rapidly changing data models.</li>
+      <li><strong>Serverless</strong> — No instances to provision. Automatically scales from zero to global traffic. Pay per read/write operation and GB stored.</li>
+      <li><strong>For apps</strong> — Backend for mobile apps, web apps. Real-time listeners — when a document changes, all connected clients are instantly notified (great for chat apps, live feeds, collaborative tools).</li>
+      <li><strong>For metadata storage</strong> — In data engineering, Firestore stores pipeline metadata: job status, configuration, run history. Lightweight, fast lookups by document ID.</li>
+    </ul>
+  </div>
+</section>
+
+
+<!-- ==========================
+     5. WORKFLOW ORCHESTRATION
+========================== -->
+<section class="section" id="orchestrate">
+  <h2 class="section-title" style="border-color:#3ecf8e;">🎼 Workflow Orchestration</h2>
+  <p style="color:var(--muted);margin-bottom:1.2rem;font-size:0.93rem;">
+    <strong style="color:var(--text);">Workflow Orchestration</strong> = coordinating the execution of multiple tasks in the correct order, handling dependencies, retries, scheduling, and notifications across your entire data platform.
+  </p>
+
+  <div class="table-wrap" style="margin-bottom:2rem;">
+    <table>
+      <thead><tr><th>GCP Service</th><th>Description / Use Case</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Cloud Composer</strong></td><td>DAG-based workflow orchestration (Apache Airflow)</td></tr>
+        <tr><td><strong>Cloud Scheduler</strong></td><td>Cron-based scheduling service</td></tr>
+        <tr><td><strong>Cloud Functions</strong></td><td>Trigger jobs from events (file upload, Pub/Sub, etc.)</td></tr>
+        <tr><td><strong>Workflows</strong></td><td>Step-based orchestration across GCP services (serverless)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="detail-block" style="border-color:#3ecf8e22;">
+    <h3 style="color:#3ecf8e;">Cloud Composer — DAG-based orchestration</h3>
+    <ul>
+      <li><strong>DAG-based</strong> — Workflows are written as Directed Acyclic Graphs in Python. Each node is a task (operator). Each edge is a dependency. Visualised in Airflow's web UI as a graph or Gantt chart.</li>
+      <li><strong>Operators</strong> — Pre-built task types in Airflow: BashOperator (run a shell command), PythonOperator (run a Python function), BigQueryOperator (run a SQL query), DataflowCreateJavaJobOperator (start a Dataflow job), and hundreds more.</li>
+      <li>Supports complex scheduling: "run every Monday at 6 AM", "run when upstream DAG completes", "skip weekend runs", etc.</li>
+    </ul>
+
+    <h3 style="color:#3ecf8e;">Cloud Scheduler — Cron-based scheduling</h3>
+    <ul>
+      <li><strong>Cloud Scheduler</strong> — A fully managed enterprise-grade cron job service. Schedule HTTP requests, Pub/Sub messages, or App Engine tasks at any frequency.</li>
+      <li><strong>Cron</strong> = a Unix/Linux time-based job scheduler. Uses cron expressions (e.g., <code style="background:#1e2435;padding:0.1rem 0.3rem;border-radius:4px;color:#94a3b8;">0 2 * * *</code> = "every day at 2:00 AM"). Cloud Scheduler uses standard cron syntax.</li>
+      <li><strong>When to use vs Composer</strong> — Scheduler is simpler: "call this URL every hour." Composer handles complex multi-step dependencies. For a single-step job on a schedule, Cloud Scheduler is lighter and cheaper.</li>
+      <li>Examples: Trigger a Cloud Function every 15 minutes, send a Pub/Sub message daily at midnight to kick off a pipeline, call a Cloud Run service every Sunday.</li>
+    </ul>
+
+    <h3 style="color:#3ecf8e;">Cloud Functions — Event-triggered job launcher</h3>
+    <ul>
+      <li>In the orchestration context, Cloud Functions acts as the glue that reacts to events and triggers downstream jobs.</li>
+      <li><strong>File upload trigger</strong> — When a new CSV lands in a GCS bucket, a Cloud Function fires and starts a Dataflow job to process it.</li>
+      <li><strong>Pub/Sub trigger</strong> — When a message arrives in a Pub/Sub topic, a Cloud Function starts a Dataproc job or posts to a Slack webhook.</li>
+      <li>Stateless — each invocation is independent. For complex stateful orchestration with retries and monitoring, use Composer or Workflows instead.</li>
+    </ul>
+
+    <h3 style="color:#3ecf8e;">Workflows — Step-based serverless orchestration</h3>
+    <ul>
+      <li><strong>Workflows</strong> — GCP's newer, fully serverless workflow orchestration service. Define pipelines as YAML or JSON steps. No Airflow needed — lighter and cheaper for simpler use cases.</li>
+      <li><strong>Step-based</strong> — Each step is a named unit of work: call an HTTP endpoint, call a GCP API, assign a variable, loop, branch on conditions, handle errors.</li>
+      <li><strong>Across GCP services</strong> — Natively integrates with Cloud Run, Cloud Functions, BigQuery, Pub/Sub, and any HTTP endpoint. Chain GCP API calls without managing infrastructure.</li>
+      <li><strong>Serverless</strong> — Pay per step execution. No persistent infrastructure. Scales to zero when idle — perfect for infrequent pipelines.</li>
+      <li><strong>When to use vs Composer</strong> — Workflows for simpler, API-driven orchestration (call API A, then call API B, then write to BigQuery). Composer for complex multi-step ETL with hundreds of tasks, retries, and a visual DAG UI.</li>
+    </ul>
+  </div>
+</section>
+
+
+<!-- ==========================
+     6. MONITORING & LOGGING
+========================== -->
+<section class="section" id="monitor">
+  <h2 class="section-title" style="border-color:#f87171;">📊 Monitoring &amp; Logging</h2>
+  <p style="color:var(--muted);margin-bottom:1.2rem;font-size:0.93rem;">
+    <strong style="color:var(--text);">Monitoring &amp; Logging</strong> = observing the health, performance, and correctness of your systems in production. Without observability, you are flying blind — you won't know something broke until users complain.
+  </p>
+
+  <div class="table-wrap" style="margin-bottom:2rem;">
+    <table>
+      <thead><tr><th>GCP Service</th><th>Description / Use Case</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Cloud Logging</strong></td><td>Centralized structured logging</td></tr>
+        <tr><td><strong>Cloud Monitoring</strong></td><td>Dashboard and alerting on metrics and uptime</td></tr>
+        <tr><td><strong>Error Reporting</strong></td><td>Collect stack traces and exceptions</td></tr>
+        <tr><td><strong>Cloud Trace</strong></td><td>Latency analysis for services</td></tr>
+        <tr><td><strong>Data Catalog</strong></td><td>Metadata management, data discovery, and governance</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="detail-block" style="border-color:#f8717122;">
+    <h3 style="color:#f87171;">Cloud Logging — Centralized Structured Logging</h3>
+    <ul>
+      <li><strong>Cloud Logging</strong> — GCP's fully managed log management service (formerly Stackdriver Logging). Collects, stores, and allows querying of logs from all GCP services and your applications.</li>
+      <li><strong>Centralized</strong> — All logs (from Dataflow jobs, Cloud Functions, App Engine, GKE pods, VMs) flow into one place. No SSH-ing into servers to tail log files.</li>
+      <li><strong>Structured logging</strong> — Logs are stored as JSON objects (not raw text strings). Each log entry has fields: timestamp, severity (INFO, WARNING, ERROR, CRITICAL), resource (which VM/function/service), and your custom fields. Structured logs are machine-searchable: query <code style="background:#1e2435;padding:0.1rem 0.3rem;border-radius:4px;color:#94a3b8;">severity=ERROR AND resource.type="cloud_function"</code>.</li>
+      <li>Log retention: 30 days by default for most logs. Export to GCS, BigQuery, or Pub/Sub for longer retention or further analysis.</li>
+      <li><strong>Log-based metrics</strong> — Create custom metrics from log patterns. Example: count the number of ERROR log entries per minute and alert when it spikes.</li>
+    </ul>
+
+    <h3 style="color:#f87171;">Cloud Monitoring — Dashboard and Alerting</h3>
+    <ul>
+      <li><strong>Cloud Monitoring</strong> — GCP's metrics collection and alerting service (formerly Stackdriver Monitoring). Collects time-series metrics from all GCP services automatically.</li>
+      <li><strong>Dashboard</strong> — Build visual dashboards showing real-time and historical metrics: CPU utilisation, memory usage, request latency, error rate, Dataflow job throughput, BigQuery slot usage, Pub/Sub message backlog.</li>
+      <li><strong>Alerting</strong> — Define alert policies: "Alert me when CPU &gt; 80% for 5 minutes" or "Alert when Pub/Sub undelivered message count &gt; 10,000". Notifications via Email, SMS, PagerDuty, Slack, Webhook.</li>
+      <li><strong>Metrics</strong> — Numeric measurements over time. Examples: CPU utilisation (%), requests per second (RPS), disk I/O (MB/s), Dataflow worker count. Stored as time-series data.</li>
+      <li><strong>Uptime checks</strong> — Continuously ping your HTTP endpoints from multiple global locations. Alert if the service is down or responding slowly.</li>
+    </ul>
+
+    <h3 style="color:#f87171;">Error Reporting — Stack Traces and Exceptions</h3>
+    <ul>
+      <li><strong>Error Reporting</strong> — Automatically collects, groups, and surfaces application errors from Cloud Logging. Groups similar errors together so you see "NullPointerException in line 42 occurred 1,247 times in the last hour."</li>
+      <li><strong>Stack traces</strong> — When a program crashes, the stack trace shows the exact sequence of function calls that led to the error, with file names and line numbers. Essential for debugging. Example:
+        <div class="highlight-box" style="border-color:#f87171;">
+          at process_data() line 42: KeyError 'user_id'<br/>
+          at transform() line 15<br/>
+          at run_pipeline() line 8
+        </div>
+      </li>
+      <li><strong>Exceptions</strong> — Errors that occur during program execution that the program didn't expect (and may not have handled). Error Reporting catches unhandled exceptions automatically from Python, Java, Go, Node.js apps on GCP.</li>
+      <li>Links errors to Cloud Logging entries, Cloud Trace spans, and even source code on GitHub/Cloud Source Repositories for instant context.</li>
+    </ul>
+
+    <h3 style="color:#f87171;">Cloud Trace — Latency Analysis</h3>
+    <ul>
+      <li><strong>Cloud Trace</strong> — A distributed tracing system that collects latency data from your applications. Shows how long each part of a request takes as it passes through multiple microservices.</li>
+      <li><strong>Latency</strong> — The time delay between a request being made and the response being received. High latency = slow user experience. Cloud Trace measures latency at every step of a request.</li>
+      <li><strong>Distributed tracing</strong> — In a microservices architecture, one user request may touch 10 different services. Trace follows the request across all of them, measuring how long each service took and where bottlenecks are.</li>
+      <li><strong>Trace spans</strong> — Each unit of work in a trace is a span (e.g., "Database query took 450ms", "Cache lookup took 2ms", "API call to Auth service took 120ms"). Spans nest to show the full call tree.</li>
+      <li><strong>Use case</strong> — Identify which service or database query is causing slowness in a data pipeline. Optimize the slowest step first (the critical path).</li>
+    </ul>
+
+    <h3 style="color:#f87171;">Data Catalog — Metadata Management, Discovery &amp; Governance</h3>
+    <ul>
+      <li><strong>Data Catalog</strong> — A fully managed, scalable metadata management service for all your data assets across GCP. Think of it as a searchable library card catalogue for your entire data platform.</li>
+      <li><strong>Metadata</strong> — Data about data. Example: table name, schema (column names and types), owner, creation date, last modified, row count, description, tags, lineage (where the data came from and where it goes). Metadata does NOT include the actual data rows.</li>
+      <li><strong>Data management</strong> — Catalog automatically ingests metadata from BigQuery tables, GCS files, Pub/Sub topics, Dataproc clusters, and Cloud SQL databases. Keeps an always-up-to-date inventory.</li>
+      <li><strong>Data discovery</strong> — Engineers and analysts search the catalog to find the right dataset. "What tables do we have about user behavior?" Search by name, description, tag, or column name. No more asking teammates "where is the orders table?"</li>
+      <li><strong>Governance</strong> — Manage access policies, data classification (PII — Personally Identifiable Information, PHI — Protected Health Information, Confidential), and compliance labels. Know who accessed what data and when. Meet GDPR, HIPAA, and other regulatory requirements.
+        <ul>
+          <li><strong>PII</strong> = data that identifies a specific individual (name, email, phone, SSN). Must be protected and tracked.</li>
+          <li><strong>Data lineage</strong> — Track the full journey of data: where it was created, what transformations it went through, where it was used. Critical for debugging data quality issues and compliance audits.</li>
+        </ul>
+      </li>
+      <li><strong>Tags and tag templates</strong> — Attach business context to data assets. Tag a BigQuery table: "Contains PII: Yes", "Data Owner: Finance Team", "Refresh Frequency: Daily".</li>
+    </ul>
+  </div>
+</section>
+
+
+<!-- MASTER ARCHITECTURE FLOW -->
+<section class="section">
+  <h2 class="section-title" style="border-color:#a78bfa;">🏗️ Complete GCP Data Architecture Flow</h2>
+  <div class="detail-block">
+    <div style="background:#1e2435;border-radius:12px;padding:1.5rem;font-family:monospace;font-size:0.88rem;color:#94a3b8;line-height:2;">
+      <span style="color:#f59e0b;">📥 SOURCES</span><br/>
+      IoT Sensors / Web Apps / SaaS tools / On-prem DBs / AWS S3<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;↓ &nbsp;<span style="color:#3ecf8e;">[Cloud Pub/Sub]</span> real-time events &nbsp;|&nbsp; <span style="color:#3ecf8e;">[Storage Transfer Service]</span> bulk files<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;↓ &nbsp;<span style="color:#3ecf8e;">[BigQuery Data Transfer Service]</span> SaaS data<br/><br/>
+
+      <span style="color:#f59e0b;">🗄️ RAW STORAGE</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#4f9cf9;">[Cloud Storage / GCS]</span> — raw data lake<br/><br/>
+
+      <span style="color:#f59e0b;">⚙️ PROCESSING</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#4f9cf9;">[Dataflow]</span> serverless stream+batch ETL &nbsp;|&nbsp; <span style="color:#4f9cf9;">[Dataproc]</span> Spark/Hadoop jobs<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#4f9cf9;">[Datastream]</span> CDC from operational DBs<br/><br/>
+
+      <span style="color:#f59e0b;">🗄️ SERVING LAYER</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#a78bfa;">[BigQuery]</span> analytics warehouse &nbsp;|&nbsp; <span style="color:#a78bfa;">[Bigtable]</span> low-latency NoSQL<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#a78bfa;">[Cloud SQL]</span> relational ops DB &nbsp;|&nbsp; <span style="color:#a78bfa;">[Spanner]</span> global SQL &nbsp;|&nbsp; <span style="color:#a78bfa;">[Firestore]</span> docs<br/><br/>
+
+      <span style="color:#f59e0b;">🎼 ORCHESTRATION</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#3ecf8e;">[Cloud Composer]</span> complex DAGs &nbsp;|&nbsp; <span style="color:#3ecf8e;">[Cloud Scheduler]</span> cron &nbsp;|&nbsp; <span style="color:#3ecf8e;">[Workflows]</span> serverless steps<br/><br/>
+
+      <span style="color:#f59e0b;">📊 OBSERVABILITY</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#f87171;">[Cloud Logging]</span> all logs &nbsp;|&nbsp; <span style="color:#f87171;">[Cloud Monitoring]</span> metrics+alerts<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#f87171;">[Error Reporting]</span> exceptions &nbsp;|&nbsp; <span style="color:#f87171;">[Cloud Trace]</span> latency &nbsp;|&nbsp; <span style="color:#f87171;">[Data Catalog]</span> governance
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     PART 3 — RECOMMENDED STACK FOR A DATA ENGINEER
+============================================================ -->
+
+<div style="max-width:1200px;margin:0 auto 2rem;">
+  <div style="border-top:2px solid var(--border);margin:2rem 0;"></div>
+  <h1 style="text-align:center;font-size:2rem;background:linear-gradient(135deg,#3ecf8e,#4f9cf9,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:0.4rem;">
+    Recommended Stack for a Data Engineer
+  </h1>
+  <p style="text-align:center;color:var(--muted);margin-bottom:2.5rem;">The go-to GCP tool for every stage of a data engineering pipeline — with every term explained</p>
+</div>
+
+<section class="section" id="recommended-stack">
+  <h2 class="section-title" style="border-color:#3ecf8e;">🏆 Recommended Stack — At a Glance</h2>
+
+  <div class="table-wrap" style="margin-bottom:2rem;">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:160px;">Stage</th>
+          <th>Recommended GCP Tools</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>📥 Ingest</strong></td>
+          <td>
+            <span class="badge badge-purple">Pub/Sub</span>
+            <span class="badge badge-blue">GCS</span>
+            <span class="badge badge-orange">BQ DTS</span>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>⚙️ Process</strong></td>
+          <td>
+            <span class="badge badge-blue">Dataflow</span>
+            <span class="badge badge-orange">Dataproc</span>
+            <span class="badge badge-green">BigQuery</span>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>🗄️ Store</strong></td>
+          <td>
+            <span class="badge badge-green">BigQuery</span>
+            <span class="badge badge-blue">GCS</span>
+            <span class="badge badge-orange">Cloud SQL</span>
+            <span class="badge badge-purple">Bigtable</span>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>🎼 Orchestrate</strong></td>
+          <td>
+            <span class="badge badge-green">Cloud Composer</span>
+            <span class="badge badge-blue">Cloud Functions</span>
+            <span class="badge badge-orange">Scheduler</span>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>📊 Monitor</strong></td>
+          <td>
+            <span class="badge badge-red">Cloud Logging</span>
+            <span class="badge badge-red">Monitoring</span>
+            <span class="badge badge-purple">Data Catalog</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- STAGE-BY-STAGE BREAKDOWN -->
+  <div class="detail-block">
+
+    <!-- INGEST -->
+    <h2 style="font-size:1.3rem;margin-bottom:0.3rem;">📥 Stage 1 — Ingest</h2>
+    <p class="tagline" style="color:var(--muted);font-size:0.9rem;margin-bottom:1.2rem;">Tools: <strong style="color:var(--text);">Pub/Sub, GCS, BQ DTS</strong></p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin-bottom:1.8rem;">
+
+      <div style="background:#1a1d27;border:1px solid #2a2d3e;border-top:3px solid #a78bfa;border-radius:12px;padding:1.2rem;">
+        <div style="font-weight:700;color:#a78bfa;margin-bottom:0.5rem;">Pub/Sub</div>
+        <p style="font-size:0.88rem;color:#94a3b8;">
+          <strong style="color:var(--text);">Why first choice for ingest?</strong> Any source — IoT device, mobile app, server, external system — can publish a message to a Pub/Sub topic instantly. No schema required. Handles millions of events/second. Acts as the universal intake buffer so downstream systems don't get overwhelmed by spikes.<br/><br/>
+          <strong style="color:var(--text);">Pub/Sub</strong> = Publish-Subscribe. Publisher sends to a <em>topic</em>. Subscriber reads from a <em>subscription</em>. Fully decoupled — adding a new consumer never affects the producer.<br/><br/>
+          <strong style="color:var(--text);">Real-world example:</strong> 10,000 delivery trucks sending GPS coordinates every 30 seconds → all publish to <code style="background:#0f1117;padding:0.1rem 0.3rem;border-radius:3px;color:#94a3b8;">topic/truck-locations</code> → Dataflow subscribes and processes.
+        </p>
+      </div>
+
+      <div style="background:#1a1d27;border:1px solid #2a2d3e;border-top:3px solid #4f9cf9;border-radius:12px;padding:1.2rem;">
+        <div style="font-weight:700;color:#4f9cf9;margin-bottom:0.5rem;">GCS — Google Cloud Storage</div>
+        <p style="font-size:0.88rem;color:#94a3b8;">
+          <strong style="color:var(--text);">Why for ingest?</strong> When data arrives as files (not events), GCS is the landing zone. Partners, batch exports, data dumps — all land in a GCS bucket. Cheap, durable, unlimited scale.<br/><br/>
+          <strong style="color:var(--text);">GCS</strong> = Google Cloud Storage. Object storage — store any file (CSV, JSON, Parquet, Avro, images, logs). Access via HTTPS URL. 11 nines (99.999999999%) durability — your data is replicated across multiple data centers automatically.<br/><br/>
+          <strong style="color:var(--text);">Real-world example:</strong> Finance team exports monthly transactions as a 50GB CSV → uploads to <code style="background:#0f1117;padding:0.1rem 0.3rem;border-radius:3px;color:#94a3b8;">gs://company-data-lake/finance/2024-10/</code> → Dataflow job processes it overnight.
+        </p>
+      </div>
+
+      <div style="background:#1a1d27;border:1px solid #2a2d3e;border-top:3px solid #f59e0b;border-radius:12px;padding:1.2rem;">
+        <div style="font-weight:700;color:#f59e0b;margin-bottom:0.5rem;">BQ DTS — BigQuery Data Transfer Service</div>
+        <p style="font-size:0.88rem;color:#94a3b8;">
+          <strong style="color:var(--text);">Why for ingest?</strong> When data lives in external SaaS systems (not files, not event streams), BQ DTS is a zero-code way to schedule automatic data loads into BigQuery.<br/><br/>
+          <strong style="color:var(--text);">BQ</strong> = BigQuery (GCP's data warehouse). <strong style="color:var(--text);">DTS</strong> = Data Transfer Service. A managed connector catalog: Google Ads, Google Analytics, YouTube, Campaign Manager, AWS S3, Teradata, and third-party apps.<br/><br/>
+          <strong style="color:var(--text);">Real-world example:</strong> Marketing team needs daily Google Ads spend data in BigQuery for dashboards. Configure DTS once → it runs every morning at 6 AM, pulls yesterday's ad data, and appends it to a BigQuery table. No code, no maintenance.
+        </p>
+      </div>
+
+    </div>
+
+    <!-- PROCESS -->
+    <h2 style="font-size:1.3rem;margin-bottom:0.3rem;margin-top:1.5rem;">⚙️ Stage 2 — Process</h2>
+    <p class="tagline" style="color:var(--muted);font-size:0.9rem;margin-bottom:1.2rem;">Tools: <strong style="color:var(--text);">Dataflow, Dataproc, BigQuery</strong></p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin-bottom:1.8rem;">
+
+      <div style="background:#1a1d27;border:1px solid #2a2d3e;border-top:3px solid #4f9cf9;border-radius:12px;padding:1.2rem;">
+        <div style="font-weight:700;color:#4f9cf9;margin-bottom:0.5rem;">Dataflow</div>
+        <p style="font-size:0.88rem;color:#94a3b8;">
+          <strong style="color:var(--text);">When to pick for processing?</strong> When you need unified batch + streaming with zero infrastructure management. Best for new GCP-native pipelines.<br/><br/>
+          <strong style="color:var(--text);">How it processes:</strong> Reads from Pub/Sub or GCS → applies PTransforms (filter nulls, parse JSON, aggregate by window, join with reference data) → writes to BigQuery or GCS. The Apache Beam SDK handles all the distributed computation logic.<br/><br/>
+          <strong style="color:var(--text);">Auto-scaling:</strong> If Pub/Sub backlog grows (data arriving faster than workers can process), Dataflow automatically adds more worker VMs. When caught up, it removes them. You never touch this.
+        </p>
+      </div>
+
+      <div style="background:#1a1d27;border:1px solid #2a2d3e;border-top:3px solid #f59e0b;border-radius:12px;padding:1.2rem;">
+        <div style="font-weight:700;color:#f59e0b;margin-bottom:0.5rem;">Dataproc</div>
+        <p style="font-size:0.88rem;color:#94a3b8;">
+          <strong style="color:var(--text);">When to pick for processing?</strong> When you have existing Spark or Hadoop jobs to migrate, or when your team already knows PySpark/Scala Spark.<br/><br/>
+          <strong style="color:var(--text);">How it processes:</strong> Spins up a cluster of VMs running Apache Spark. Your PySpark script reads from GCS, processes in distributed memory across all workers, writes output back to GCS or BigQuery. 10–100× faster than Hadoop MapReduce for typical jobs.<br/><br/>
+          <strong style="color:var(--text);">Cost tip:</strong> Use preemptible (spot) VMs for worker nodes — up to 80% cheaper. Only use standard VMs for the master node. Delete the cluster when the job finishes; don't leave it running idle.
+        </p>
+      </div>
+
+      <div style="background:#1a1d27;border:1px solid #2a2d3e;border-top:3px solid #3ecf8e;border-radius:12px;padding:1.2rem;">
+        <div style="font-weight:700;color:#3ecf8e;margin-bottom:0.5rem;">BigQuery (as processing engine)</div>
+        <p style="font-size:0.88rem;color:#94a3b8;">
+          <strong style="color:var(--text);">When to pick for processing?</strong> When your transformation logic is expressible in SQL and your data is already in BigQuery. ELT pattern — transform inside the warehouse.<br/><br/>
+          <strong style="color:var(--text);">How it processes:</strong> Write a SQL query as a scheduled query or dbt model. BigQuery runs it across its internal distributed infrastructure, processes billions of rows, and writes results to a new table. No separate processing cluster needed.<br/><br/>
+          <strong style="color:var(--text);">ELT advantage:</strong> No ETL pipeline to maintain. The transformation IS the query. Business analysts can understand and modify the logic (it's just SQL). Tools like dbt (data build tool) layer version control and testing on top.
+        </p>
+      </div>
+
+    </div>
+
+    <!-- STORE -->
+    <h2 style="font-size:1.3rem;margin-bottom:0.3rem;margin-top:1.5rem;">🗄️ Stage 3 — Store</h2>
+    <p class="tagline" style="color:var(--muted);font-size:0.9rem;margin-bottom:1.2rem;">Tools: <strong style="color:var(--text);">BigQuery, GCS, Cloud SQL, Bigtable</strong></p>
+
+    <div style="background:#1e2435;border-radius:12px;padding:1.2rem;margin-bottom:1rem;">
+      <p style="font-size:0.9rem;color:#94a3b8;margin-bottom:0.8rem;"><strong style="color:var(--text);">How to choose the right storage:</strong></p>
+      <table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
+        <thead>
+          <tr style="border-bottom:1px solid #2a2d3e;">
+            <th style="padding:0.5rem 0.8rem;text-align:left;color:var(--muted);">Service</th>
+            <th style="padding:0.5rem 0.8rem;text-align:left;color:var(--muted);">Data type</th>
+            <th style="padding:0.5rem 0.8rem;text-align:left;color:var(--muted);">Access pattern</th>
+            <th style="padding:0.5rem 0.8rem;text-align:left;color:var(--muted);">Scale</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid #2a2d3e;">
+            <td style="padding:0.5rem 0.8rem;color:#3ecf8e;"><strong>BigQuery</strong></td>
+            <td style="padding:0.5rem 0.8rem;color:#94a3b8;">Structured, analytical</td>
+            <td style="padding:0.5rem 0.8rem;color:#94a3b8;">Complex SQL queries by analysts</td>
+            <td style="padding:0.5rem 0.8rem;color:#94a3b8;">Petabytes</td>
+          </tr>
+          <tr style="border-bottom:1px solid #2a2d3e;">
+            <td style="padding:0.5rem 0.8rem;color:#4f9cf9;"><strong>GCS</strong></td>
+            <td style="padding:0.5rem 0.8rem;color:#94a3b8;">Any format (raw files)</td>
+            <td style="padding:0.5rem 0.8rem;color:#94a3b8;">Read/write full files, data lake</td>
+            <td style="padding:0.5rem 0.8rem;color:#94a3b8;">Unlimited</td>
+          </tr>
+          <tr style="border-bottom:1px solid #2a2d3e;">
+            <td style="padding:0.5rem 0.8rem;color:#f59e0b;"><strong>Cloud SQL</strong></td>
+            <td style="padding:0.5rem 0.8rem;color:#94a3b8;">Relational (rows+tables)</td>
+            <td style="padding:0.5rem 0.8rem;color:#94a3b8;">OLTP — many small reads/writes</td>
+            <td style="padding:0.5rem 0.8rem;color:#94a3b8;">TBs</td>
+          </tr>
+          <tr>
+            <td style="padding:0.5rem 0.8rem;color:#a78bfa;"><strong>Bigtable</strong></td>
+            <td style="padding:0.5rem 0.8rem;color:#94a3b8;">Wide-column NoSQL</td>
+            <td style="padding:0.5rem 0.8rem;color:#94a3b8;">Millions of reads/writes per sec by row key</td>
+            <td style="padding:0.5rem 0.8rem;color:#94a3b8;">Petabytes</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ul style="font-size:0.9rem;color:#94a3b8;padding-left:1.4rem;margin-bottom:1.8rem;">
+      <li><strong style="color:var(--text);">BigQuery</strong> — Your primary analytics store. All clean, processed data lands here. BI tools (Looker, Data Studio, Tableau) connect to BigQuery for dashboards.</li>
+      <li><strong style="color:var(--text);">GCS</strong> — Raw and staged data. The data lake. Also used for archiving BigQuery exports, storing ML model artifacts, and checkpoint files from Dataflow.</li>
+      <li><strong style="color:var(--text);">Cloud SQL</strong> — Operational database for your application backend (the app that creates orders, users, products). Data here is later replicated to BigQuery for analytics via Datastream (CDC).</li>
+      <li><strong style="color:var(--text);">Bigtable</strong> — When you need sub-10ms reads at millions of QPS. Example: serving ML model predictions, real-time personalisation, time-series metrics for a monitoring dashboard that queries by sensor ID + time range.</li>
+    </ul>
+
+    <!-- ORCHESTRATE -->
+    <h2 style="font-size:1.3rem;margin-bottom:0.3rem;margin-top:1.5rem;">🎼 Stage 4 — Orchestrate</h2>
+    <p class="tagline" style="color:var(--muted);font-size:0.9rem;margin-bottom:1.2rem;">Tools: <strong style="color:var(--text);">Cloud Composer, Cloud Functions, Scheduler</strong></p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin-bottom:1.8rem;">
+
+      <div style="background:#1a1d27;border:1px solid #2a2d3e;border-top:3px solid #3ecf8e;border-radius:12px;padding:1.2rem;">
+        <div style="font-weight:700;color:#3ecf8e;margin-bottom:0.5rem;">Cloud Composer</div>
+        <p style="font-size:0.88rem;color:#94a3b8;">
+          <strong style="color:var(--text);">Use when:</strong> You have multi-step pipelines with complex dependencies, retries, branching, and need a visual monitoring UI.<br/><br/>
+          <strong style="color:var(--text);">Example DAG:</strong> (1) Check if new file exists in GCS → (2) If yes, trigger Dataflow job → (3) Wait for completion → (4) Run BigQuery SQL transformation → (5) Export result to GCS → (6) Send Slack notification → (7) If any step fails, retry up to 3 times then alert PagerDuty.<br/><br/>
+          <strong style="color:var(--text);">Key terms:</strong> DAG = Directed Acyclic Graph. Operator = a task type (BigQueryOperator, DataflowCreateJobOperator, SlackAPIPostOperator). Scheduler = the Airflow process that decides when to run each DAG.
+        </p>
+      </div>
+
+      <div style="background:#1a1d27;border:1px solid #2a2d3e;border-top:3px solid #4f9cf9;border-radius:12px;padding:1.2rem;">
+        <div style="font-weight:700;color:#4f9cf9;margin-bottom:0.5rem;">Cloud Functions</div>
+        <p style="font-size:0.88rem;color:#94a3b8;">
+          <strong style="color:var(--text);">Use when:</strong> You need lightweight, event-driven glue between services. No complex multi-step dependencies — just "when X happens, do Y."<br/><br/>
+          <strong style="color:var(--text);">Example:</strong> File lands in GCS → Cloud Function fires → reads the file header to validate schema → if valid, publishes a "ready" message to Pub/Sub → Dataflow picks it up. If invalid, sends an alert email.<br/><br/>
+          <strong style="color:var(--text);">Key terms:</strong> Serverless = no VM to manage. Cold start = small delay (100ms–2s) on the first invocation when no instance is warm. Memory = 128MB to 32GB configurable. Timeout = max 60 minutes (2nd gen) per invocation.
+        </p>
+      </div>
+
+      <div style="background:#1a1d27;border:1px solid #2a2d3e;border-top:3px solid #f59e0b;border-radius:12px;padding:1.2rem;">
+        <div style="font-weight:700;color:#f59e0b;margin-bottom:0.5rem;">Cloud Scheduler</div>
+        <p style="font-size:0.88rem;color:#94a3b8;">
+          <strong style="color:var(--text);">Use when:</strong> You need to trigger something on a time-based schedule (not an event). The simplest orchestration tool.<br/><br/>
+          <strong style="color:var(--text);">Example:</strong> Every day at 2:00 AM UTC → Scheduler sends a Pub/Sub message → Cloud Function receives it → triggers a Dataproc batch job to process the previous day's data.<br/><br/>
+          <strong style="color:var(--text);">Cron syntax:</strong> <code style="background:#0f1117;padding:0.1rem 0.3rem;border-radius:3px;color:#3ecf8e;">0 2 * * *</code> = "at minute 0 of hour 2, every day, every month, every day of week." Five fields: minute (0–59), hour (0–23), day of month (1–31), month (1–12), day of week (0–7). <code style="background:#0f1117;padding:0.1rem 0.3rem;border-radius:3px;color:#3ecf8e;">*</code> = every.
+        </p>
+      </div>
+
+    </div>
+
+    <!-- MONITOR -->
+    <h2 style="font-size:1.3rem;margin-bottom:0.3rem;margin-top:1.5rem;">📊 Stage 5 — Monitor</h2>
+    <p class="tagline" style="color:var(--muted);font-size:0.9rem;margin-bottom:1.2rem;">Tools: <strong style="color:var(--text);">Cloud Logging, Cloud Monitoring, Data Catalog</strong></p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin-bottom:1rem;">
+
+      <div style="background:#1a1d27;border:1px solid #2a2d3e;border-top:3px solid #f87171;border-radius:12px;padding:1.2rem;">
+        <div style="font-weight:700;color:#f87171;margin-bottom:0.5rem;">Cloud Logging</div>
+        <p style="font-size:0.88rem;color:#94a3b8;">
+          <strong style="color:var(--text);">What it does:</strong> Collects and stores log entries from every GCP service and your code automatically. Logs are structured JSON — searchable by any field.<br/><br/>
+          <strong style="color:var(--text);">As a data engineer use it to:</strong> Debug why a Dataflow job failed (read worker logs), see which Cloud Function invocations errored and why, track BigQuery job execution logs, audit who ran what query and when.<br/><br/>
+          <strong style="color:var(--text);">Key terms:</strong> Log entry = one event record. Severity levels: DEBUG &lt; INFO &lt; NOTICE &lt; WARNING &lt; ERROR &lt; CRITICAL &lt; ALERT &lt; EMERGENCY. Log sink = export logs to GCS/BigQuery/Pub/Sub for long-term retention or analysis. Log-based metric = turn a log pattern into a time-series metric for alerting.
+        </p>
+      </div>
+
+      <div style="background:#1a1d27;border:1px solid #2a2d3e;border-top:3px solid #f87171;border-radius:12px;padding:1.2rem;">
+        <div style="font-weight:700;color:#f87171;margin-bottom:0.5rem;">Cloud Monitoring</div>
+        <p style="font-size:0.88rem;color:#94a3b8;">
+          <strong style="color:var(--text);">What it does:</strong> Collects numeric metrics from all GCP services. Lets you build dashboards and set alert policies.<br/><br/>
+          <strong style="color:var(--text);">As a data engineer use it to:</strong> Monitor Dataflow job throughput (elements/second), Pub/Sub subscription backlog (messages not yet processed), BigQuery slot utilisation (how much compute you're using vs. reserved), Dataproc cluster CPU and memory, Cloud Function error rates and execution times.<br/><br/>
+          <strong style="color:var(--text);">Key terms:</strong> Metric = a named, numeric measurement over time (time-series). Alert policy = "if metric X exceeds threshold Y for duration Z, send notification to channel W." Uptime check = HTTP ping to verify a service is reachable from multiple global regions.
+        </p>
+      </div>
+
+      <div style="background:#1a1d27;border:1px solid #2a2d3e;border-top:3px solid #a78bfa;border-radius:12px;padding:1.2rem;">
+        <div style="font-weight:700;color:#a78bfa;margin-bottom:0.5rem;">Data Catalog</div>
+        <p style="font-size:0.88rem;color:#94a3b8;">
+          <strong style="color:var(--text);">What it does:</strong> A searchable inventory of all your data assets — BigQuery tables, GCS files, Pub/Sub topics — with their metadata, ownership, and governance tags.<br/><br/>
+          <strong style="color:var(--text);">As a data engineer use it to:</strong> Discover what datasets exist without asking teammates. Tag tables with business context (owner, PII sensitivity, SLA). Track data lineage (this table was created by this Dataflow job, from this Pub/Sub topic). Meet compliance requirements (GDPR, HIPAA) by classifying sensitive data.<br/><br/>
+          <strong style="color:var(--text);">Key terms:</strong> Metadata = data about data (schema, description, owner, tags — NOT the actual rows). Data lineage = the full journey of data from source to destination. PII = Personally Identifiable Information (must be tagged and access-controlled). Tag template = a reusable form of metadata fields attached to assets.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- DECISION CHEAT SHEET -->
+<section class="section">
+  <h2 class="section-title" style="border-color:#f59e0b;">⚡ Decision Cheat Sheet — Pick the Right Tool Fast</h2>
+  <div class="detail-block">
+
+    <h3 style="color:#f59e0b;">If the question contains…</h3>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:0.8rem;">
+
+      <div style="background:#1e2435;border-radius:10px;padding:1rem;">
+        <div style="color:#f59e0b;font-weight:700;margin-bottom:0.4rem;">💬 "real-time events" / "decouple" / "stream ingest"</div>
+        <div style="color:#3ecf8e;font-size:0.9rem;">→ <strong>Pub/Sub</strong></div>
+      </div>
+
+      <div style="background:#1e2435;border-radius:10px;padding:1rem;">
+        <div style="color:#f59e0b;font-weight:700;margin-bottom:0.4rem;">📂 "raw files" / "data lake" / "CSV / JSON / Parquet"</div>
+        <div style="color:#4f9cf9;font-size:0.9rem;">→ <strong>Cloud Storage (GCS)</strong></div>
+      </div>
+
+      <div style="background:#1e2435;border-radius:10px;padding:1rem;">
+        <div style="color:#f59e0b;font-weight:700;margin-bottom:0.4rem;">🔄 "external SaaS" / "Google Ads" / "S3 to BigQuery"</div>
+        <div style="color:#f59e0b;font-size:0.9rem;">→ <strong>BQ Data Transfer Service</strong></div>
+      </div>
+
+      <div style="background:#1e2435;border-radius:10px;padding:1rem;">
+        <div style="color:#f59e0b;font-weight:700;margin-bottom:0.4rem;">⚙️ "stream + batch" / "serverless pipeline" / "Apache Beam"</div>
+        <div style="color:#4f9cf9;font-size:0.9rem;">→ <strong>Dataflow</strong></div>
+      </div>
+
+      <div style="background:#1e2435;border-radius:10px;padding:1rem;">
+        <div style="color:#f59e0b;font-weight:700;margin-bottom:0.4rem;">🔥 "Spark" / "Hadoop" / "legacy migration" / "PySpark"</div>
+        <div style="color:#f59e0b;font-size:0.9rem;">→ <strong>Dataproc</strong></div>
+      </div>
+
+      <div style="background:#1e2435;border-radius:10px;padding:1rem;">
+        <div style="color:#f59e0b;font-weight:700;margin-bottom:0.4rem;">📊 "analytics" / "SQL" / "data warehouse" / "ELT" / "BI"</div>
+        <div style="color:#3ecf8e;font-size:0.9rem;">→ <strong>BigQuery</strong></div>
+      </div>
+
+      <div style="background:#1e2435;border-radius:10px;padding:1rem;">
+        <div style="color:#f59e0b;font-weight:700;margin-bottom:0.4rem;">🕐 "schedule" / "cron" / "every night at 2 AM"</div>
+        <div style="color:#f59e0b;font-size:0.9rem;">→ <strong>Cloud Scheduler</strong></div>
+      </div>
+
+      <div style="background:#1e2435;border-radius:10px;padding:1rem;">
+        <div style="color:#f59e0b;font-weight:700;margin-bottom:0.4rem;">🎼 "multi-step pipeline" / "DAG" / "Airflow" / "dependencies"</div>
+        <div style="color:#3ecf8e;font-size:0.9rem;">→ <strong>Cloud Composer</strong></div>
+      </div>
+
+      <div style="background:#1e2435;border-radius:10px;padding:1rem;">
+        <div style="color:#f59e0b;font-weight:700;margin-bottom:0.4rem;">⚡ "event-driven" / "trigger on file upload" / "lightweight function"</div>
+        <div style="color:#4f9cf9;font-size:0.9rem;">→ <strong>Cloud Functions</strong></div>
+      </div>
+
+      <div style="background:#1e2435;border-radius:10px;padding:1rem;">
+        <div style="color:#f59e0b;font-weight:700;margin-bottom:0.4rem;">🌡️ "IoT" / "time-series" / "millions of writes/sec" / "low latency"</div>
+        <div style="color:#a78bfa;font-size:0.9rem;">→ <strong>Bigtable</strong></div>
+      </div>
+
+      <div style="background:#1e2435;border-radius:10px;padding:1rem;">
+        <div style="color:#f59e0b;font-weight:700;margin-bottom:0.4rem;">🗃️ "relational" / "MySQL" / "PostgreSQL" / "transactional app DB"</div>
+        <div style="color:#f59e0b;font-size:0.9rem;">→ <strong>Cloud SQL</strong></div>
+      </div>
+
+      <div style="background:#1e2435;border-radius:10px;padding:1rem;">
+        <div style="color:#f59e0b;font-weight:700;margin-bottom:0.4rem;">📋 "logs" / "debug" / "structured logging" / "who ran what"</div>
+        <div style="color:#f87171;font-size:0.9rem;">→ <strong>Cloud Logging</strong></div>
+      </div>
+
+      <div style="background:#1e2435;border-radius:10px;padding:1rem;">
+        <div style="color:#f59e0b;font-weight:700;margin-bottom:0.4rem;">📈 "metrics" / "alerts" / "dashboard" / "uptime" / "CPU usage"</div>
+        <div style="color:#f87171;font-size:0.9rem;">→ <strong>Cloud Monitoring</strong></div>
+      </div>
+
+      <div style="background:#1e2435;border-radius:10px;padding:1rem;">
+        <div style="color:#f59e0b;font-weight:700;margin-bottom:0.4rem;">🔍 "metadata" / "data discovery" / "governance" / "PII" / "lineage"</div>
+        <div style="color:#a78bfa;font-size:0.9rem;">→ <strong>Data Catalog</strong></div>
+      </div>
+
+      <div style="background:#1e2435;border-radius:10px;padding:1rem;">
+        <div style="color:#f59e0b;font-weight:700;margin-bottom:0.4rem;">🔄 "CDC" / "Change Data Capture" / "replicate DB to BigQuery"</div>
+        <div style="color:#4f9cf9;font-size:0.9rem;">→ <strong>Datastream</strong></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     PART 4 — GCS STORAGE CLASSES
+============================================================ -->
+
+<div style="max-width:1200px;margin:0 auto 2rem;">
+  <div style="border-top:2px solid var(--border);margin:2rem 0;"></div>
+  <h1 style="text-align:center;font-size:2rem;background:linear-gradient(135deg,#4f9cf9,#3ecf8e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:0.4rem;">
+    Cloud Storage — Storage Classes
+  </h1>
+  <p style="text-align:center;color:var(--muted);margin-bottom:2.5rem;">Standard · Nearline · Coldline · Archive — every column, every word explained</p>
+</div>
+
+<section class="section" id="storage-classes">
+  <h2 class="section-title" style="border-color:#4f9cf9;">🗄️ GCS Storage Classes — At a Glance</h2>
+
+  <!-- MNEMONIC BADGE -->
+  <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+    <div style="background:#1e2435;border:1px solid var(--border);border-radius:12px;padding:0.8rem 1.4rem;display:flex;align-items:center;gap:0.6rem;">
+      <span style="font-size:1.3rem;">🧠</span>
+      <div>
+        <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.2rem;">Memory trick — SNCA</div>
+        <div style="font-size:1.1rem;font-weight:700;letter-spacing:0.15em;">
+          <span style="color:#4f9cf9;">S</span><span style="color:#3ecf8e;">N</span><span style="color:#f59e0b;">C</span><span style="color:#f87171;">A</span>
+        </div>
+        <div style="font-size:0.8rem;color:#94a3b8;margin-top:0.2rem;">
+          <span style="color:#4f9cf9;">S</span>tandard &nbsp;·&nbsp;
+          <span style="color:#3ecf8e;">N</span>earline &nbsp;·&nbsp;
+          <span style="color:#f59e0b;">C</span>oldline &nbsp;·&nbsp;
+          <span style="color:#f87171;">A</span>rchive
+        </div>
+      </div>
+    </div>
+    <div style="color:#94a3b8;font-size:0.88rem;max-width:500px;">
+      As you go from <strong style="color:#4f9cf9;">S → A</strong>: storage gets <strong style="color:var(--text);">cheaper</strong>, retrieval gets <strong style="color:var(--text);">more expensive</strong>, minimum storage duration gets <strong style="color:var(--text);">longer</strong>, and you're expected to access the data <strong style="color:var(--text);">less frequently</strong>.
+    </div>
+  </div>
+
+  <!-- MAIN TABLE -->
+  <div class="table-wrap" style="margin-bottom:2.5rem;">
+    <table>
+      <thead>
+        <tr>
+          <th>Storage Class</th>
+          <th>Access Frequency</th>
+          <th>Cost (Storage)</th>
+          <th>Retrieval Cost</th>
+          <th>Min Duration</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <span style="font-weight:700;color:#4f9cf9;">Standard</span>
+          </td>
+          <td><span class="badge badge-blue">Frequent</span></td>
+          <td><span class="badge badge-red">High</span></td>
+          <td><span class="badge badge-green">Low</span></td>
+          <td><strong>None</strong></td>
+        </tr>
+        <tr>
+          <td>
+            <span style="font-weight:700;color:#3ecf8e;">Nearline</span>
+          </td>
+          <td><span class="badge badge-green">Monthly</span></td>
+          <td><span class="badge badge-orange">Medium</span></td>
+          <td><span class="badge badge-orange">Medium</span></td>
+          <td><strong>30 days</strong></td>
+        </tr>
+        <tr>
+          <td>
+            <span style="font-weight:700;color:#f59e0b;">Coldline</span>
+          </td>
+          <td><span class="badge badge-orange">Quarterly</span></td>
+          <td><span class="badge badge-green">Low</span></td>
+          <td><span class="badge badge-red">High</span></td>
+          <td><strong>90 days</strong></td>
+        </tr>
+        <tr>
+          <td>
+            <span style="font-weight:700;color:#f87171;">Archive</span>
+          </td>
+          <td><span class="badge badge-red">Yearly</span></td>
+          <td><span class="badge badge-green">Very Low</span></td>
+          <td><span class="badge badge-red">Very High</span></td>
+          <td><strong>365 days</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- VISUAL SPECTRUM BAR -->
+  <div style="max-width:900px;margin:0 auto 2.5rem;">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;border-radius:12px;overflow:hidden;">
+      <div style="background:#1d3a6e;padding:0.8rem 1rem;text-align:center;">
+        <div style="color:#93c5fd;font-weight:700;font-size:0.9rem;">Standard</div>
+        <div style="color:#94a3b8;font-size:0.75rem;margin-top:0.3rem;">Hot data</div>
+      </div>
+      <div style="background:#14432a;padding:0.8rem 1rem;text-align:center;">
+        <div style="color:#6ee7b7;font-weight:700;font-size:0.9rem;">Nearline</div>
+        <div style="color:#94a3b8;font-size:0.75rem;margin-top:0.3rem;">Warm data</div>
+      </div>
+      <div style="background:#442a05;padding:0.8rem 1rem;text-align:center;">
+        <div style="color:#fcd34d;font-weight:700;font-size:0.9rem;">Coldline</div>
+        <div style="color:#94a3b8;font-size:0.75rem;margin-top:0.3rem;">Cold data</div>
+      </div>
+      <div style="background:#450a0a;padding:0.8rem 1rem;text-align:center;">
+        <div style="color:#fca5a5;font-weight:700;font-size:0.9rem;">Archive</div>
+        <div style="color:#94a3b8;font-size:0.75rem;margin-top:0.3rem;">Frozen data</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:4px;">
+      <div style="background:#1e2435;padding:0.5rem 1rem;border-radius:6px;text-align:center;font-size:0.8rem;color:#94a3b8;">
+        ← Storage cost increases &nbsp;|&nbsp; Retrieval cost decreases →
+      </div>
+      <div style="background:#1e2435;padding:0.5rem 1rem;border-radius:6px;text-align:center;font-size:0.8rem;color:#94a3b8;">
+        ← Access more frequently &nbsp;|&nbsp; Access less frequently →
+      </div>
+    </div>
+  </div>
+
+  <!-- COLUMN-BY-COLUMN EXPLANATION -->
+  <div class="detail-block">
+    <h2 style="font-size:1.3rem;margin-bottom:1.2rem;">📖 Every Column — Word by Word</h2>
+
+    <h3 style="color:#4f9cf9;">Column 1: Storage Class</h3>
+    <p>The <strong>storage class</strong> is a property you set on a GCS bucket (or on individual objects). It tells Google how to store your data — which hardware tier, how to replicate it, and how to price it. You can change the class of an object at any time using Object Lifecycle Management rules (automated policies that move data to cheaper tiers as it ages).</p>
+
+    <h3 style="color:#4f9cf9;">Column 2: Access Frequency</h3>
+    <p><strong>Access frequency</strong> = how often you expect to read (retrieve) the data. This is the primary factor in choosing a class. GCS does NOT enforce this — you can read Archive data daily if you want — but you'll pay the high retrieval cost. Choose based on your expected real-world access pattern.</p>
+    <ul>
+      <li><strong>Frequent</strong> (Standard) — Accessed multiple times per day, every day. Live application data, active datasets, files your pipeline reads constantly.</li>
+      <li><strong>Monthly</strong> (Nearline) — Accessed roughly once a month or less. Monthly reporting data, ML training sets you retrain monthly, backups you restore rarely.</li>
+      <li><strong>Quarterly</strong> (Coldline) — Accessed roughly once every 90 days. Disaster recovery files, compliance archives you occasionally audit.</li>
+      <li><strong>Yearly</strong> (Archive) — Accessed roughly once a year or less. Legal records, historical logs kept for 7-year regulatory retention, raw data you never expect to touch again.</li>
+    </ul>
+
+    <h3 style="color:#4f9cf9;">Column 3: Cost (Storage)</h3>
+    <p><strong>Storage cost</strong> = how much you pay per GB per month to store the data, regardless of whether you access it. This is the ongoing "parking fee."</p>
+    <ul>
+      <li><strong>High</strong> (Standard) — ~$0.020/GB/month. Most expensive per GB stored, but no retrieval cost. Worth it when you access data often — retrieval savings outweigh storage premium.</li>
+      <li><strong>Medium</strong> (Nearline) — ~$0.010/GB/month. Half the Standard rate. You accept a small retrieval fee in exchange for lower storage cost.</li>
+      <li><strong>Low</strong> (Coldline) — ~$0.004/GB/month. Much cheaper to store. Higher retrieval cost. Best when data sits untouched for months at a time.</li>
+      <li><strong>Very Low</strong> (Archive) — ~$0.0012/GB/month. Cheapest possible storage on GCP. The tradeoff: extremely high retrieval cost and a 365-day minimum. Best for true long-term archival.</li>
+    </ul>
+    <div class="highlight-box" style="border-color:#4f9cf9;">
+      <strong>Rule of thumb:</strong> If you read the data &gt;1× per month → Standard. If ~1×/month → Nearline. If ~1×/quarter → Coldline. If ~1×/year → Archive.
+    </div>
+
+    <h3 style="color:#4f9cf9;">Column 4: Retrieval Cost</h3>
+    <p><strong>Retrieval cost</strong> = what you pay per GB when you READ (download) data from GCS — on top of any network egress fees. This is the "cost to get the data back."</p>
+    <ul>
+      <li><strong>Low / None</strong> (Standard) — No retrieval charge per GB. Only pay for network egress (data leaving GCP to the internet). Ideal for frequent access.</li>
+      <li><strong>Medium</strong> (Nearline) — ~$0.01/GB retrieved. Small penalty for retrieval — acceptable if you only retrieve monthly.</li>
+      <li><strong>High</strong> (Coldline) — ~$0.02/GB retrieved. Significant retrieval cost. If you accidentally access Coldline data daily, your bill will be much higher than Standard.</li>
+      <li><strong>Very High</strong> (Archive) — ~$0.05/GB retrieved. The highest retrieval cost. Additionally, Archive data may take milliseconds to minutes to become accessible (not instant like Standard). Use only for true cold archival.</li>
+    </ul>
+    <div class="highlight-box" style="border-color:#f87171;">
+      <strong>Trap to avoid:</strong> Storing infrequently accessed data in Standard (overpaying for storage) OR storing frequently accessed data in Archive (overpaying for retrieval). Match the class to your actual access pattern.
+    </div>
+
+    <h3 style="color:#4f9cf9;">Column 5: Minimum Storage Duration</h3>
+    <p><strong>Minimum duration</strong> = the minimum time GCS will bill you for storing an object, even if you delete it earlier. If you store a file in Coldline for 30 days then delete it, you are still billed for 90 days of Coldline storage.</p>
+    <ul>
+      <li><strong>None</strong> (Standard) — No minimum. Store for 1 second, pay for 1 second. Full flexibility. No lock-in.</li>
+      <li><strong>30 days</strong> (Nearline) — If you delete an object before 30 days, you're charged as if it stayed 30 days. Penalty for premature deletion.</li>
+      <li><strong>90 days</strong> (Coldline) — Must keep data at least 90 days to avoid an early deletion charge. Plan your lifecycle policies accordingly.</li>
+      <li><strong>365 days</strong> (Archive) — Commit to storing data for a full year. If you delete at day 100, you still pay for 365 days. Only use Archive when you are certain the data won't be needed for at least a year.</li>
+    </ul>
+  </div>
+
+  <!-- EACH CLASS DETAIL -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.2rem;margin-bottom:2rem;">
+
+    <div style="background:var(--card);border:1px solid var(--border);border-top:3px solid #4f9cf9;border-radius:14px;padding:1.3rem;">
+      <div style="font-size:1.2rem;font-weight:800;color:#4f9cf9;margin-bottom:0.3rem;">Standard</div>
+      <div style="font-size:0.78rem;color:#94a3b8;margin-bottom:0.9rem;">Frequent · High cost · Low retrieval · No min</div>
+      <ul style="font-size:0.85rem;color:#94a3b8;padding-left:1.2rem;">
+        <li>Active website assets (images, JS, CSS)</li>
+        <li>Files your Dataflow/Dataproc job reads every run</li>
+        <li>BigQuery external tables queried daily</li>
+        <li>Machine learning datasets in active training</li>
+        <li>Pub/Sub dead-letter queue storage</li>
+      </ul>
+      <div style="margin-top:0.8rem;background:#1e2435;border-radius:8px;padding:0.6rem 0.8rem;font-size:0.8rem;color:#93c5fd;">
+        ~$0.020/GB/month storage · $0 retrieval/GB
+      </div>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--border);border-top:3px solid #3ecf8e;border-radius:14px;padding:1.3rem;">
+      <div style="font-size:1.2rem;font-weight:800;color:#3ecf8e;margin-bottom:0.3rem;">Nearline</div>
+      <div style="font-size:0.78rem;color:#94a3b8;margin-bottom:0.9rem;">Monthly · Medium cost · Medium retrieval · 30 days</div>
+      <ul style="font-size:0.85rem;color:#94a3b8;padding-left:1.2rem;">
+        <li>Monthly analytics reports and aggregates</li>
+        <li>ML model checkpoints (retrain monthly)</li>
+        <li>Database backups accessed for monthly testing</li>
+        <li>Log archives you occasionally query</li>
+        <li>Data you migrate off Standard to save cost</li>
+      </ul>
+      <div style="margin-top:0.8rem;background:#1e2435;border-radius:8px;padding:0.6rem 0.8rem;font-size:0.8rem;color:#6ee7b7;">
+        ~$0.010/GB/month storage · ~$0.01/GB retrieval
+      </div>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--border);border-top:3px solid #f59e0b;border-radius:14px;padding:1.3rem;">
+      <div style="font-size:1.2rem;font-weight:800;color:#f59e0b;margin-bottom:0.3rem;">Coldline</div>
+      <div style="font-size:0.78rem;color:#94a3b8;margin-bottom:0.9rem;">Quarterly · Low cost · High retrieval · 90 days</div>
+      <ul style="font-size:0.85rem;color:#94a3b8;padding-left:1.2rem;">
+        <li>Disaster recovery data (restore only after outage)</li>
+        <li>Compliance archives audited quarterly</li>
+        <li>Historical transaction records (past 2–3 years)</li>
+        <li>Raw data dumps you might replay if needed</li>
+        <li>Video recordings of events (reviewed rarely)</li>
+      </ul>
+      <div style="margin-top:0.8rem;background:#1e2435;border-radius:8px;padding:0.6rem 0.8rem;font-size:0.8rem;color:#fcd34d;">
+        ~$0.004/GB/month storage · ~$0.02/GB retrieval
+      </div>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--border);border-top:3px solid #f87171;border-radius:14px;padding:1.3rem;">
+      <div style="font-size:1.2rem;font-weight:800;color:#f87171;margin-bottom:0.3rem;">Archive</div>
+      <div style="font-size:0.78rem;color:#94a3b8;margin-bottom:0.9rem;">Yearly · Very low cost · Very high retrieval · 365 days</div>
+      <ul style="font-size:0.85rem;color:#94a3b8;padding-left:1.2rem;">
+        <li>7-year legal/regulatory retention (GDPR, HIPAA)</li>
+        <li>Raw sensor data you will never re-process</li>
+        <li>Decommissioned application data (kept just in case)</li>
+        <li>Source code archives of retired products</li>
+        <li>Scientific research data (long-term preservation)</li>
+      </ul>
+      <div style="margin-top:0.8rem;background:#1e2435;border-radius:8px;padding:0.6rem 0.8rem;font-size:0.8rem;color:#fca5a5;">
+        ~$0.0012/GB/month storage · ~$0.05/GB retrieval
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SNCA EXPLANATION -->
+  <div class="detail-block" style="border-color:#3ecf8e22;">
+    <h3 style="color:#3ecf8e;">🧠 SNCA — The Memory Trick</h3>
+    <p style="font-size:0.95rem;color:#cbd5e1;margin-bottom:1rem;">
+      The image shows <strong style="color:#3ecf8e;">SNCA</strong> — a mnemonic (memory aid) made from the first letter of each storage class in order:
+    </p>
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+      <div style="background:#1d3a6e;border-radius:10px;padding:0.8rem 1.2rem;text-align:center;min-width:120px;">
+        <div style="font-size:2rem;font-weight:900;color:#93c5fd;">S</div>
+        <div style="color:#93c5fd;font-size:0.85rem;font-weight:600;">Standard</div>
+        <div style="color:#94a3b8;font-size:0.75rem;margin-top:0.2rem;">Frequent</div>
+      </div>
+      <div style="background:#14432a;border-radius:10px;padding:0.8rem 1.2rem;text-align:center;min-width:120px;">
+        <div style="font-size:2rem;font-weight:900;color:#6ee7b7;">N</div>
+        <div style="color:#6ee7b7;font-size:0.85rem;font-weight:600;">Nearline</div>
+        <div style="color:#94a3b8;font-size:0.75rem;margin-top:0.2rem;">Monthly</div>
+      </div>
+      <div style="background:#442a05;border-radius:10px;padding:0.8rem 1.2rem;text-align:center;min-width:120px;">
+        <div style="font-size:2rem;font-weight:900;color:#fcd34d;">C</div>
+        <div style="color:#fcd34d;font-size:0.85rem;font-weight:600;">Coldline</div>
+        <div style="color:#94a3b8;font-size:0.75rem;margin-top:0.2rem;">Quarterly</div>
+      </div>
+      <div style="background:#450a0a;border-radius:10px;padding:0.8rem 1.2rem;text-align:center;min-width:120px;">
+        <div style="font-size:2rem;font-weight:900;color:#fca5a5;">A</div>
+        <div style="color:#fca5a5;font-size:0.85rem;font-weight:600;">Archive</div>
+        <div style="color:#94a3b8;font-size:0.75rem;margin-top:0.2rem;">Yearly</div>
+      </div>
+    </div>
+    <p style="font-size:0.9rem;color:#94a3b8;">
+      Remembering <strong style="color:#3ecf8e;">SNCA</strong> in an exam lets you instantly recall the order of classes from hottest to coldest, and therefore the direction all five columns move as you go from S → A. You never need to memorise each row in isolation — just remember the direction of change across the spectrum.
+    </p>
+  </div>
+
+  <!-- LIFECYCLE MANAGEMENT NOTE -->
+  <div class="detail-block" style="border-color:#a78bfa22;">
+    <h3 style="color:#a78bfa;">♻️ Object Lifecycle Management — Automating Class Transitions</h3>
+    <p style="font-size:0.9rem;color:#cbd5e1;margin-bottom:0.8rem;">
+      In a real data platform you don't manually move files between storage classes. You set <strong>Lifecycle Rules</strong> on a bucket — GCS automatically transitions objects to cheaper classes as they age.
+    </p>
+    <div style="background:#1e2435;border-radius:10px;padding:1rem 1.2rem;font-family:monospace;font-size:0.82rem;color:#94a3b8;line-height:1.9;">
+      Day 0: file uploaded → <span style="color:#4f9cf9;">Standard</span> (accessed frequently by pipeline)<br/>
+      Day 30: auto-transition → <span style="color:#3ecf8e;">Nearline</span> (pipeline no longer reads it daily)<br/>
+      Day 90: auto-transition → <span style="color:#f59e0b;">Coldline</span> (rarely accessed after 3 months)<br/>
+      Day 365: auto-transition → <span style="color:#f87171;">Archive</span> (kept for compliance only)<br/>
+      Day 2555 (7 years): auto-delete (retention period met)
+    </div>
+    <p style="font-size:0.88rem;color:#94a3b8;margin-top:0.8rem;">
+      This automated flow saves significant cost — data that starts hot becomes progressively cheaper to store as it ages, with no manual intervention. Lifecycle rules are defined in JSON/YAML on the bucket and applied by GCS automatically every day.
+    </p>
+  </div>
+
+</section>
+
+
 <footer>
-  <p>GCP Services Study Notes — Dataflow · Dataproc · Cloud Composer · Pub/Sub</p>
+  <p>GCP Services Study Notes — Dataflow · Dataproc · Cloud Composer · Pub/Sub · BigQuery · Bigtable · Cloud SQL · Spanner · Firestore · Datastream · Workflows · Cloud Scheduler · Cloud Logging · Cloud Monitoring · Error Reporting · Cloud Trace · Data Catalog · GCS Storage Classes</p>
   <p style="margin-top:0.4rem">Generated for exam and interview preparation · 2024</p>
 </footer>
 
