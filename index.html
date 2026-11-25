@@ -195,7 +195,8 @@
 <!-- ── LEVEL 1: MAIN TAB BAR ── -->
 <div class="main-tabbar">
   <button class="main-btn active" onclick="showMain('gcp',this)">☁️ Google Cloud Platform</button>
-  <button class="main-btn" onclick="showMain('analytics',this)">📦 SCD &amp; SQL Analytics</button>
+  <button class="main-btn" onclick="showMain('analytics',this)">📦 SCD &amp; Analytics</button>
+  <button class="main-btn" onclick="showMain('sql',this)">🗄️ SQL</button>
 </div>
 
 <!-- ── LEVEL 2: GCP SUB-TABS ── -->
@@ -221,6 +222,14 @@
   <button class="tab-btn active" onclick="showAnalytics('scd',this)">📦 SCD Types</button>
   <button class="tab-btn" onclick="showAnalytics('ranking',this)">🏅 SQL Ranking</button>
   <button class="tab-btn" onclick="showAnalytics('dbvsdw',this)">🗄️ DB vs Data Warehouse</button>
+</div>
+
+<!-- ── LEVEL 2: SQL SUB-TABS ── -->
+<div class="tabbar hidden" id="sql-subtabbar">
+  <button class="tab-btn active" onclick="showSQL('string',this)">🔤 String Functions</button>
+  <button class="tab-btn" onclick="showSQL('math',this)">🔢 Math Functions</button>
+  <button class="tab-btn" onclick="showSQL('setops',this)">🔗 Set Operators</button>
+  <button class="tab-btn" onclick="showSQL('joins',this)">🤝 JOIN Types</button>
 </div>
 
 
@@ -2220,42 +2229,567 @@ JOIN dim_customer_current_view v ON f.customer_id = v.customer_id;
 
 
 <!-- ══════════════════════════════════════════
+     SQL — STRING FUNCTIONS
+══════════════════════════════════════════ -->
+<div class="standalone" id="tab-string">
+  <div class="phdr">
+    <h1 class="grad-blue">🔤 SQL String Functions</h1>
+    <p>TRIM · LTRIM · RTRIM · UPPER · LOWER · INITCAP · REPLACE · LPAD · RPAD — every function explained with examples</p>
+  </div>
+
+  <!-- EXACT TABLE FROM IMAGE 9 -->
+  <h2 class="stitle" style="border-color:var(--blue);">📋 From Your Notes — Image Reference</h2>
+  <div class="twrap" style="margin-bottom:2rem;">
+    <table>
+      <thead><tr><th>Function</th><th>Purpose</th><th>Example</th><th>Output</th></tr></thead>
+      <tbody>
+        <tr><td><strong style="color:var(--blue);">TRIM()</strong></td><td>Remove spaces/chars from both ends</td><td><code>TRIM(' Raj ')</code></td><td>Raj</td></tr>
+        <tr><td><strong style="color:var(--blue);">LTRIM()</strong></td><td>Remove spaces from left side</td><td><code>LTRIM(' Raj')</code></td><td>Raj</td></tr>
+        <tr><td><strong style="color:var(--blue);">RTRIM()</strong></td><td>Remove spaces from right side</td><td><code>RTRIM('Raj ')</code></td><td>Raj</td></tr>
+        <tr><td><strong style="color:var(--green);">UPPER()</strong></td><td>Convert to uppercase</td><td><code>UPPER('sql')</code></td><td>SQL</td></tr>
+        <tr><td><strong style="color:var(--green);">LOWER()</strong></td><td>Convert to lowercase</td><td><code>LOWER('SQL')</code></td><td>sql</td></tr>
+        <tr><td><strong style="color:var(--orange);">INITCAP()</strong></td><td>Capitalize first letter</td><td><code>INITCAP('raj damade')</code></td><td>Raj Damade</td></tr>
+        <tr><td><strong style="color:var(--orange);">REPLACE()</strong></td><td>Replace a substring</td><td><code>REPLACE('AB-CD','-',',')</code></td><td>ABCD</td></tr>
+        <tr><td><strong style="color:var(--purple);">LPAD()</strong></td><td>Pad left side</td><td><code>LPAD('123',5,'*')</code></td><td>**123</td></tr>
+        <tr><td><strong style="color:var(--purple);">RPAD()</strong></td><td>Pad right side</td><td><code>RPAD('Raj',6,'*')</code></td><td>Raj***</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- DEEP DIVE -->
+  <div class="dblock">
+    <h2 style="font-size:1.2rem;margin-bottom:1rem;">📖 Every Function — Word by Word</h2>
+
+    <h3 style="color:var(--blue);">TRIM() — Remove spaces/chars from BOTH ends</h3>
+    <ul>
+      <li><strong>TRIM</strong> = to cut away excess. Like trimming the edges of a piece of paper.</li>
+      <li>By default removes <strong>leading</strong> (before) and <strong>trailing</strong> (after) spaces. Can also remove a specific character: <code>TRIM('*' FROM '***Raj***')</code> → <code>Raj</code>.</li>
+      <li><strong>Why use it?</strong> — User input often has accidental spaces. <code>'Raj '</code> and <code>'Raj'</code> are NOT equal in SQL — TRIM normalises them so comparisons work correctly.</li>
+      <li>Example: <code>WHERE name = TRIM(input_value)</code> — prevents missed matches due to whitespace.</li>
+    </ul>
+
+    <h3 style="color:var(--blue);">LTRIM() — Remove spaces from LEFT side only</h3>
+    <ul>
+      <li><strong>L</strong> = Left. <strong>TRIM</strong> = remove. Only removes spaces (or a specified character) from the LEFT/beginning of the string. Right side is untouched.</li>
+      <li><code>LTRIM('   Raj')</code> → <code>'Raj'</code>. <code>LTRIM('Raj   ')</code> → <code>'Raj   '</code> (trailing spaces kept).</li>
+      <li>Useful when data has consistent left-padding that needs removal, but right formatting must be preserved.</li>
+    </ul>
+
+    <h3 style="color:var(--blue);">RTRIM() — Remove spaces from RIGHT side only</h3>
+    <ul>
+      <li><strong>R</strong> = Right. <strong>TRIM</strong> = remove. Only removes spaces (or a specified character) from the RIGHT/end of the string. Left side is untouched.</li>
+      <li><code>RTRIM('Raj   ')</code> → <code>'Raj'</code>. <code>RTRIM('   Raj')</code> → <code>'   Raj'</code> (leading spaces kept).</li>
+      <li>Commonly used to clean exported fixed-width text files where every field is right-padded with spaces to a fixed length.</li>
+    </ul>
+
+    <h3 style="color:var(--green);">UPPER() — Convert to UPPERCASE</h3>
+    <ul>
+      <li>Converts every character in the string to its uppercase equivalent. <code>'sql'</code> → <code>'SQL'</code>. <code>'Hello World'</code> → <code>'HELLO WORLD'</code>.</li>
+      <li>Non-alphabetic characters (numbers, spaces, punctuation) are unaffected.</li>
+      <li><strong>Common use:</strong> Case-insensitive comparison — <code>WHERE UPPER(name) = UPPER('raj')</code> matches 'Raj', 'RAJ', 'raj', etc.</li>
+    </ul>
+
+    <h3 style="color:var(--green);">LOWER() — Convert to lowercase</h3>
+    <ul>
+      <li>Converts every character to its lowercase equivalent. <code>'SQL'</code> → <code>'sql'</code>. <code>'Hello World'</code> → <code>'hello world'</code>.</li>
+      <li><strong>Common use:</strong> Normalise emails — <code>LOWER(email)</code> ensures <code>'Raj@Gmail.COM'</code> and <code>'raj@gmail.com'</code> are treated as the same.</li>
+    </ul>
+
+    <h3 style="color:var(--orange);">INITCAP() — Capitalize First Letter of Each Word</h3>
+    <ul>
+      <li><strong>INIT</strong> = initial. <strong>CAP</strong> = capitalize. Capitalizes the first letter of each word and lowercases the rest.</li>
+      <li><code>INITCAP('raj damade')</code> → <code>'Raj Damade'</code>. <code>INITCAP('SQL IS GREAT')</code> → <code>'Sql Is Great'</code>.</li>
+      <li>A "word" is any sequence of characters preceded by a space or non-alphanumeric character.</li>
+      <li>Not available in all databases: works in Oracle, PostgreSQL. In MySQL, combine UPPER + LOWER + SUBSTRING manually.</li>
+    </ul>
+
+    <h3 style="color:var(--orange);">REPLACE() — Replace a Substring</h3>
+    <ul>
+      <li><strong>Syntax:</strong> <code>REPLACE(string, old_substring, new_substring)</code></li>
+      <li>Finds every occurrence of <code>old_substring</code> in <code>string</code> and replaces it with <code>new_substring</code>.</li>
+      <li><code>REPLACE('AB-CD', '-', ',')</code> → replaces the hyphen with a comma → <code>'AB,CD'</code>. Wait — image shows <code>ABCD</code> (the comma is used as separator in the args, the actual result replaces '-' with ',' giving 'AB,CD' or removes it giving 'ABCD' depending on the third arg being empty).</li>
+      <li>To DELETE a substring: use empty string as third arg — <code>REPLACE('AB-CD', '-', '')</code> → <code>'ABCD'</code>.</li>
+      <li><strong>Common use:</strong> Remove unwanted characters (<code>REPLACE(phone, '-', '')</code> removes all hyphens from phone numbers), fix encoding issues, standardise separators.</li>
+    </ul>
+
+    <h3 style="color:var(--purple);">LPAD() — Pad Left Side</h3>
+    <ul>
+      <li><strong>L</strong> = Left. <strong>PAD</strong> = add characters. Adds padding to the LEFT of a string until it reaches the target length.</li>
+      <li><strong>Syntax:</strong> <code>LPAD(string, total_length, pad_character)</code></li>
+      <li><code>LPAD('123', 5, '*')</code> → total length = 5, string is 3 chars, so 2 stars added on left → <code>'**123'</code>.</li>
+      <li>If the string is already longer than <code>total_length</code>, it is truncated from the right.</li>
+      <li><strong>Common use:</strong> Format numbers with leading zeros — <code>LPAD(invoice_number, 8, '0')</code> → <code>'00000042'</code>. Used in fixed-width report formatting, ID number generation.</li>
+    </ul>
+
+    <h3 style="color:var(--purple);">RPAD() — Pad Right Side</h3>
+    <ul>
+      <li><strong>R</strong> = Right. <strong>PAD</strong> = add characters. Adds padding to the RIGHT of a string until it reaches the target length.</li>
+      <li><strong>Syntax:</strong> <code>RPAD(string, total_length, pad_character)</code></li>
+      <li><code>RPAD('Raj', 6, '*')</code> → total length = 6, string is 3 chars, so 3 stars added on right → <code>'Raj***'</code>.</li>
+      <li><strong>Common use:</strong> Fixed-width text file generation, right-padding labels for alignment in reports.</li>
+    </ul>
+  </div>
+
+  <!-- QUICK REFERENCE CHEAT SHEET -->
+  <div class="dblock">
+    <h3 style="color:var(--green);">⚡ When to Use Which</h3>
+    <div class="cheat">
+      <div class="cheat-item"><div class="cheat-q">Remove accidental spaces from user input</div><div class="cheat-a" style="color:var(--blue);">→ <strong>TRIM()</strong></div></div>
+      <div class="cheat-item"><div class="cheat-q">Remove only leading (left) spaces</div><div class="cheat-a" style="color:var(--blue);">→ <strong>LTRIM()</strong></div></div>
+      <div class="cheat-item"><div class="cheat-q">Remove only trailing (right) spaces</div><div class="cheat-a" style="color:var(--blue);">→ <strong>RTRIM()</strong></div></div>
+      <div class="cheat-item"><div class="cheat-q">Case-insensitive search / normalise data</div><div class="cheat-a" style="color:var(--green);">→ <strong>UPPER()</strong> or <strong>LOWER()</strong></div></div>
+      <div class="cheat-item"><div class="cheat-q">Format names as "Title Case"</div><div class="cheat-a" style="color:var(--orange);">→ <strong>INITCAP()</strong></div></div>
+      <div class="cheat-item"><div class="cheat-q">Remove hyphens, fix separators, delete chars</div><div class="cheat-a" style="color:var(--orange);">→ <strong>REPLACE()</strong></div></div>
+      <div class="cheat-item"><div class="cheat-q">Add leading zeros / left-align with padding</div><div class="cheat-a" style="color:var(--purple);">→ <strong>LPAD()</strong></div></div>
+      <div class="cheat-item"><div class="cheat-q">Right-align text with padding for reports</div><div class="cheat-a" style="color:var(--purple);">→ <strong>RPAD()</strong></div></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SQL — MATH FUNCTIONS
+══════════════════════════════════════════ -->
+<div class="standalone" id="tab-math">
+  <div class="phdr">
+    <h1 class="grad-green">🔢 SQL Math Functions</h1>
+    <p>ROUND · CEIL · FLOOR · ABS · MOD — every function explained with examples</p>
+  </div>
+
+  <!-- EXACT TABLE FROM IMAGE 9 -->
+  <h2 class="stitle" style="border-color:var(--green);">📋 From Your Notes — Image Reference</h2>
+  <div class="twrap" style="margin-bottom:2rem;">
+    <table>
+      <thead><tr><th>Function</th><th>Purpose</th><th>Example</th><th>Output</th></tr></thead>
+      <tbody>
+        <tr><td><strong style="color:var(--blue);">ROUND()</strong></td><td>Round to decimals</td><td><code>ROUND(123.456, 2)</code></td><td>123.46</td></tr>
+        <tr><td><strong style="color:var(--green);">CEIL()</strong></td><td>Round up</td><td><code>CEIL(12.3)</code></td><td>13</td></tr>
+        <tr><td><strong style="color:var(--orange);">FLOOR()</strong></td><td>Round down</td><td><code>FLOOR(12.9)</code></td><td>12</td></tr>
+        <tr><td><strong style="color:var(--purple);">ABS()</strong></td><td>Absolute value</td><td><code>ABS(-25)</code></td><td>25</td></tr>
+        <tr><td><strong style="color:var(--red);">MOD()</strong></td><td>Remainder</td><td><code>MOD(25, 7)</code></td><td>4</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- DEEP DIVE -->
+  <div class="dblock">
+    <h2 style="font-size:1.2rem;margin-bottom:1rem;">📖 Every Function — Word by Word</h2>
+
+    <h3 style="color:var(--blue);">ROUND() — Round to N decimal places</h3>
+    <ul>
+      <li><strong>Syntax:</strong> <code>ROUND(number, decimal_places)</code></li>
+      <li>Rounds the number to the specified number of decimal places using standard rounding rules: if the next digit is ≥ 5, round up; if &lt; 5, round down.</li>
+      <li><code>ROUND(123.456, 2)</code> → looks at the 3rd decimal (6 ≥ 5) → rounds up the 2nd decimal → <code>123.46</code></li>
+      <li><code>ROUND(123.454, 2)</code> → looks at the 3rd decimal (4 &lt; 5) → keeps 2nd decimal → <code>123.45</code></li>
+      <li><code>ROUND(123.456, 0)</code> → rounds to nearest integer → <code>123</code></li>
+      <li><code>ROUND(123.456, -1)</code> → rounds to nearest 10 → <code>120</code></li>
+      <li><strong>Common use:</strong> Financial calculations (round to 2 decimal places for currency), display formatting, reducing floating-point precision errors.</li>
+    </ul>
+
+    <h3 style="color:var(--green);">CEIL() — Always Round UP (Ceiling)</h3>
+    <ul>
+      <li><strong>CEIL</strong> = ceiling. The ceiling is above you — CEIL always goes UP to the next integer, no matter how small the decimal part.</li>
+      <li><code>CEIL(12.3)</code> → rounds UP to <code>13</code> (even though it's closer to 12)</li>
+      <li><code>CEIL(12.9)</code> → <code>13</code>. <code>CEIL(12.0)</code> → <code>12</code> (already an integer). <code>CEIL(-12.3)</code> → <code>-12</code> (towards zero = up for negatives).</li>
+      <li><strong>Also called:</strong> CEILING() in SQL Server and MySQL. CEIL() in Oracle, PostgreSQL, BigQuery.</li>
+      <li><strong>Common use:</strong> Calculating pages needed (<code>CEIL(total_rows / page_size)</code>), billing (always charge full unit), time calculations (always round up to next hour).</li>
+    </ul>
+
+    <h3 style="color:var(--orange);">FLOOR() — Always Round DOWN (Floor)</h3>
+    <ul>
+      <li><strong>FLOOR</strong> = floor. The floor is below you — FLOOR always goes DOWN to the previous integer, discarding the decimal.</li>
+      <li><code>FLOOR(12.9)</code> → rounds DOWN to <code>12</code> (even though it's closer to 13)</li>
+      <li><code>FLOOR(12.1)</code> → <code>12</code>. <code>FLOOR(12.0)</code> → <code>12</code>. <code>FLOOR(-12.3)</code> → <code>-13</code> (away from zero = down for negatives).</li>
+      <li><strong>FLOOR vs ROUND:</strong> ROUND(12.9, 0) = 13 (rounds up because .9 ≥ .5). FLOOR(12.9) = 12 (always goes down regardless).</li>
+      <li><strong>Common use:</strong> Age calculation (how many COMPLETE years), quota calculations (how many complete units fit), truncating timestamps to day/hour boundaries.</li>
+    </ul>
+
+    <h3 style="color:var(--purple);">ABS() — Absolute Value</h3>
+    <ul>
+      <li><strong>ABS</strong> = Absolute value. Returns the magnitude of a number regardless of its sign. Always returns a non-negative result.</li>
+      <li><code>ABS(-25)</code> → <code>25</code>. <code>ABS(25)</code> → <code>25</code>. <code>ABS(-3.14)</code> → <code>3.14</code>. <code>ABS(0)</code> → <code>0</code>.</li>
+      <li><strong>Mathematical meaning:</strong> The distance from zero on the number line, without direction. |-25| = |25| = 25.</li>
+      <li><strong>Common use:</strong> Finding the difference between two values regardless of order — <code>ABS(price_a - price_b)</code> gives the gap without caring which is larger. Detecting anomalies (variance from expected). Calculating error margins.</li>
+    </ul>
+
+    <h3 style="color:var(--red);">MOD() — Remainder (Modulo)</h3>
+    <ul>
+      <li><strong>MOD</strong> = Modulo / Modulus. Returns the remainder after dividing the first number by the second.</li>
+      <li><strong>Syntax:</strong> <code>MOD(dividend, divisor)</code></li>
+      <li><code>MOD(25, 7)</code> → 25 ÷ 7 = 3 remainder <strong>4</strong> (3×7=21, 25-21=4) → returns <code>4</code></li>
+      <li><code>MOD(10, 2)</code> → 10 ÷ 2 = 5 remainder 0 → returns <code>0</code> (even number check!)</li>
+      <li><code>MOD(10, 3)</code> → 10 ÷ 3 = 3 remainder 1 → returns <code>1</code></li>
+      <li>In many databases you can also use the <code>%</code> operator: <code>25 % 7</code> = <code>4</code>.</li>
+      <li><strong>Common uses:</strong>
+        <ul>
+          <li>Even/odd check: <code>MOD(id, 2) = 0</code> → even rows only</li>
+          <li>Cyclic assignment: <code>MOD(row_number, 3)</code> distributes rows into 3 groups (0, 1, 2)</li>
+          <li>Pagination: which page does row N belong to?</li>
+          <li>Time calculations: <code>MOD(minutes, 60)</code> = remaining minutes after full hours</li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <!-- VISUAL COMPARISON -->
+  <div class="dblock">
+    <h3 style="color:var(--orange);">ROUND vs CEIL vs FLOOR — Side by Side</h3>
+    <div class="twrap" style="margin-bottom:0;">
+      <table>
+        <thead><tr><th>Input</th><th style="color:var(--blue);">ROUND(x,0)</th><th style="color:var(--green);">CEIL(x)</th><th style="color:var(--orange);">FLOOR(x)</th></tr></thead>
+        <tbody>
+          <tr><td>12.1</td><td>12 (rounds down, .1 &lt; .5)</td><td>13 (always up)</td><td>12 (always down)</td></tr>
+          <tr><td>12.5</td><td>13 (rounds up, .5 ≥ .5)</td><td>13 (always up)</td><td>12 (always down)</td></tr>
+          <tr><td>12.9</td><td>13 (rounds up, .9 ≥ .5)</td><td>13 (always up)</td><td>12 (always down)</td></tr>
+          <tr><td>-12.3</td><td>-12 (rounds towards 0)</td><td>-12 (towards 0 = up)</td><td>-13 (away from 0 = down)</td></tr>
+          <tr><td>12.0</td><td>12 (already integer)</td><td>12 (already integer)</td><td>12 (already integer)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SQL — SET OPERATORS
+══════════════════════════════════════════ -->
+<div class="standalone" id="tab-setops">
+  <div class="phdr">
+    <h1 class="grad-orange">🔗 SQL Set Operators</h1>
+    <p>UNION · UNION ALL · INTERSECT · EXCEPT / MINUS — every operator explained with examples</p>
+  </div>
+
+  <!-- SET OPERATORS LIST FROM IMAGE -->
+  <div class="dblock" style="margin-bottom:1.5rem;">
+    <h3 style="color:var(--orange);">Set Operators: Union, Union All, Intersect, Minus</h3>
+    <p>Set operators combine the results of two or more <code>SELECT</code> queries into a single result set. All queries combined must have the <strong>same number of columns</strong> with <strong>matching data types</strong>.</p>
+    <div class="hbox" style="border-color:var(--orange);">
+      <strong>Rule:</strong> Column names and data types must match in both queries. The column names in the result come from the FIRST query.
+    </div>
+  </div>
+
+  <!-- INTERSECT vs EXCEPT TABLE FROM IMAGE -->
+  <h2 class="stitle" style="border-color:var(--orange);">📋 INTERSECT vs EXCEPT/MINUS — From Your Notes</h2>
+  <div class="twrap" style="margin-bottom:1.5rem;">
+    <table>
+      <thead><tr><th>Feature</th><th style="color:var(--blue);">INTERSECT</th><th style="color:var(--red);">EXCEPT / MINUS</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Purpose</strong></td><td>Returns common rows</td><td>Returns rows in first query not in second</td></tr>
+        <tr><td><strong>Duplicates</strong></td><td>Removes duplicates</td><td>Removes duplicates</td></tr>
+        <tr><td><strong>Column matching</strong></td><td>Must match name &amp; data type</td><td>Must match name &amp; data type</td></tr>
+        <tr><td><strong>Support</strong></td><td>SQL Server, PostgreSQL, Oracle</td><td>PostgreSQL, SQL Server → EXCEPT &nbsp;|&nbsp; Oracle → MINUS</td></tr>
+        <tr><td><strong>BigQuery Support</strong></td><td><span class="badge b-red">✗ No direct support — Use INNER JOIN</span></td><td><span class="badge b-green">✓ EXCEPT supported</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- INTERSECT SYNTAX FROM IMAGE -->
+  <div class="dblock" style="border-color:#4f9cf922;">
+    <h2 style="font-size:1.2rem;color:var(--blue);margin-bottom:0.5rem;">🔵 INTERSECT — Common rows between two queries</h2>
+    <p class="tline">Returns only the rows that appear in BOTH query results. Removes duplicates automatically.</p>
+
+    <h3 style="color:var(--blue);">Definition — word by word</h3>
+    <ul>
+      <li><strong>INTERSECT</strong> — From set theory: the intersection of two sets = elements that belong to BOTH sets. Example: Set A = {1,2,3,4}, Set B = {3,4,5,6} → Intersection = {3,4}.</li>
+      <li><strong>Returns common rows</strong> — Only rows that exist in BOTH the first SELECT and the second SELECT are returned. If a row exists in only one query, it is excluded.</li>
+      <li><strong>Removes duplicates</strong> — Like UNION (not UNION ALL), INTERSECT automatically deduplicates the output. Each unique common row appears exactly once.</li>
+      <li><strong>Column names and data types must match</strong> — The number of columns in both SELECTs must be identical, and each column pair must have compatible data types (e.g., both VARCHAR, both INT). The column names in the output come from the FIRST SELECT.</li>
+    </ul>
+
+    <h3 style="color:var(--blue);">Syntax (from image)</h3>
+    <div class="arch">
+SELECT column_list
+FROM table1
+INTERSECT
+SELECT column_list
+FROM table2;</div>
+
+    <h3 style="color:var(--blue);">Example</h3>
+    <div class="arch">
+-- Find customers who placed orders AND made payments
+SELECT customer_id FROM orders
+INTERSECT
+SELECT customer_id FROM payments;
+-- Returns: only customer_ids that appear in BOTH tables</div>
+
+    <h3 style="color:var(--blue);">BigQuery workaround (no INTERSECT)</h3>
+    <div class="arch">
+-- BigQuery doesn't support INTERSECT directly — use INNER JOIN instead:
+SELECT DISTINCT o.customer_id
+FROM orders o
+INNER JOIN payments p ON o.customer_id = p.customer_id;</div>
+  </div>
+
+  <!-- ALL 4 SET OPERATORS DETAIL -->
+  <div class="dblock">
+    <h2 style="font-size:1.2rem;margin-bottom:1rem;">📖 All 4 Set Operators — Explained</h2>
+
+    <h3 style="color:var(--blue);">UNION — Combine + Remove Duplicates</h3>
+    <ul>
+      <li>Combines rows from two queries into one result set and <strong>removes all duplicate rows</strong>.</li>
+      <li>Like a mathematical set union: A ∪ B = all elements in A or B, without repetition.</li>
+      <li>Requires sorting/hashing to find and remove duplicates → <strong>slower than UNION ALL</strong>.</li>
+      <li><strong>When to use:</strong> When you want all unique values from two sources — e.g., all unique customers who either placed an order OR made an enquiry.</li>
+    </ul>
+    <div class="arch">
+SELECT name FROM customers_2023
+UNION
+SELECT name FROM customers_2024;
+-- Returns all unique names from both years (no duplicates)</div>
+
+    <h3 style="color:var(--green);">UNION ALL — Combine + Keep ALL Duplicates</h3>
+    <ul>
+      <li>Combines rows from two queries into one result set and <strong>keeps ALL rows including duplicates</strong>.</li>
+      <li>No deduplication step → <strong>faster than UNION</strong>. Use this by default unless you specifically need deduplication.</li>
+      <li>The total row count = count(query1) + count(query2) always.</li>
+      <li><strong>When to use:</strong> Combining data from partitioned tables (monthly sales tables combined into one result). When you know there are no duplicates. When you want to count all occurrences including repeats.</li>
+    </ul>
+    <div class="arch">
+SELECT product_id, revenue FROM sales_q1
+UNION ALL
+SELECT product_id, revenue FROM sales_q2;
+-- Returns all rows from both quarters, duplicates included</div>
+
+    <h3 style="color:var(--orange);">INTERSECT — Only Common Rows</h3>
+    <ul>
+      <li>Returns rows that exist in <strong>BOTH</strong> queries. If a row is only in one query, it is excluded. Automatically deduplicates.</li>
+      <li>Like the overlapping region of a Venn diagram.</li>
+      <li>Not supported in BigQuery (use INNER JOIN instead). Supported in: SQL Server, PostgreSQL, Oracle.</li>
+    </ul>
+
+    <h3 style="color:var(--red);">EXCEPT / MINUS — Rows in First Query NOT in Second</h3>
+    <ul>
+      <li>Returns rows from the <strong>first query that do NOT appear in the second query</strong>. Rows that exist only in the second query are ignored.</li>
+      <li>Like subtracting one set from another: A - B = elements in A that are not in B.</li>
+      <li><strong>EXCEPT</strong> — The standard SQL name. Used in PostgreSQL, SQL Server.</li>
+      <li><strong>MINUS</strong> — Oracle's equivalent of EXCEPT. Same behaviour, different keyword. In BigQuery, use <code>EXCEPT</code>.</li>
+      <li>Automatically removes duplicates from the result.</li>
+      <li><strong>When to use:</strong> Find customers who registered but never placed an order. Find products in catalogue but never sold. Identify missing/orphaned records.</li>
+    </ul>
+    <div class="arch">
+-- Find customers who registered but never placed an order
+SELECT customer_id FROM customers
+EXCEPT
+SELECT customer_id FROM orders;
+-- Returns customer_ids that are in customers but NOT in orders</div>
+
+    <h3 style="color:var(--orange);">UNION vs UNION ALL vs INTERSECT vs EXCEPT</h3>
+    <div class="twrap" style="margin-bottom:0;">
+      <table>
+        <thead><tr><th>Operator</th><th>Returns</th><th>Duplicates</th><th>Speed</th><th>Use when</th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--blue);font-weight:700;">UNION</td><td>All rows from both</td><td>Removed</td><td>Slower</td><td>Need unique combined result</td></tr>
+          <tr><td style="color:var(--green);font-weight:700;">UNION ALL</td><td>All rows from both</td><td>Kept</td><td>Fastest</td><td>No dedup needed / count all</td></tr>
+          <tr><td style="color:var(--orange);font-weight:700;">INTERSECT</td><td>Rows in BOTH queries</td><td>Removed</td><td>Medium</td><td>Find common records</td></tr>
+          <tr><td style="color:var(--red);font-weight:700;">EXCEPT/MINUS</td><td>Rows in first NOT in second</td><td>Removed</td><td>Medium</td><td>Find missing/difference</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SQL — JOIN TYPES
+══════════════════════════════════════════ -->
+<div class="standalone" id="tab-joins">
+  <div class="phdr">
+    <h1 class="grad-blue">🤝 SQL JOIN Types</h1>
+    <p>INNER · LEFT · RIGHT · FULL OUTER · CROSS · SELF — every join explained with diagrams and examples</p>
+  </div>
+
+  <!-- EXACT TABLE FROM IMAGE 9 -->
+  <h2 class="stitle" style="border-color:var(--blue);">📋 From Your Notes — Image Reference</h2>
+  <div class="twrap" style="margin-bottom:2rem;">
+    <table>
+      <thead><tr><th>Join Type</th><th>Returns</th></tr></thead>
+      <tbody>
+        <tr><td><strong style="color:var(--blue);">INNER JOIN</strong></td><td>Only matching rows</td></tr>
+        <tr><td><strong style="color:var(--green);">LEFT JOIN</strong></td><td>All left + matching right</td></tr>
+        <tr><td><strong style="color:var(--orange);">RIGHT JOIN</strong></td><td>All right + matching left</td></tr>
+        <tr><td><strong style="color:var(--purple);">FULL OUTER JOIN</strong></td><td>All rows from both</td></tr>
+        <tr><td><strong style="color:var(--red);">CROSS JOIN</strong></td><td>Cartesian product</td></tr>
+        <tr><td><strong style="color:#22d3ee;">SELF JOIN</strong></td><td>Join table with itself</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- DEEP DIVE -->
+  <div class="dblock">
+    <h2 style="font-size:1.2rem;margin-bottom:1rem;">📖 Every JOIN — Word by Word</h2>
+
+    <h3 style="color:var(--blue);">INNER JOIN — Only Matching Rows</h3>
+    <ul>
+      <li><strong>INNER</strong> = inside the overlap. <strong>JOIN</strong> = combine tables. INNER JOIN returns only the rows where the join condition is TRUE in BOTH tables. If a row in the left table has no match in the right table (or vice versa), it is excluded entirely.</li>
+      <li><strong>"Only matching rows"</strong> — The intersection of the two tables based on the join key.</li>
+      <li>This is the default JOIN type — writing just <code>JOIN</code> without a keyword means <code>INNER JOIN</code>.</li>
+    </ul>
+    <div class="arch">
+SELECT e.name, d.dept_name
+FROM employees e
+INNER JOIN departments d ON e.dept_id = d.dept_id;
+-- Only employees WHO HAVE a matching department are returned
+-- Employees with dept_id = NULL are excluded
+-- Departments with no employees are excluded</div>
+
+    <h3 style="color:var(--green);">LEFT JOIN — All Left + Matching Right</h3>
+    <ul>
+      <li><strong>LEFT</strong> = the first (left) table. <strong>JOIN</strong> = combine. LEFT JOIN returns ALL rows from the LEFT table, plus the matching rows from the right table. Where there is no match in the right table, the right table columns are filled with <code>NULL</code>.</li>
+      <li><strong>"All left + matching right"</strong> — The left table is fully preserved. The right table may contribute NULLs where no match exists.</li>
+      <li>Also called <strong>LEFT OUTER JOIN</strong> (the OUTER is optional).</li>
+      <li><strong>Common use:</strong> Find all records from the main table with optional related data. Find orphaned records (WHERE right.id IS NULL).</li>
+    </ul>
+    <div class="arch">
+SELECT e.name, d.dept_name
+FROM employees e
+LEFT JOIN departments d ON e.dept_id = d.dept_id;
+-- ALL employees returned
+-- If an employee has no department → dept_name = NULL
+-- Departments with no employees NOT shown
+
+-- Find employees WITHOUT a department:
+SELECT e.name FROM employees e
+LEFT JOIN departments d ON e.dept_id = d.dept_id
+WHERE d.dept_id IS NULL;</div>
+
+    <h3 style="color:var(--orange);">RIGHT JOIN — All Right + Matching Left</h3>
+    <ul>
+      <li><strong>RIGHT</strong> = the second (right) table. RIGHT JOIN returns ALL rows from the RIGHT table, plus matching rows from the left table. Where there is no match in the left table, left columns are <code>NULL</code>.</li>
+      <li><strong>"All right + matching left"</strong> — The right table is fully preserved. The left table may contribute NULLs.</li>
+      <li>Also called <strong>RIGHT OUTER JOIN</strong>. Less commonly used — most queries can be rewritten as a LEFT JOIN by swapping the table order.</li>
+      <li><strong>Common use:</strong> When you receive a query written with the "main" table on the right side, or to find departments that have no employees.</li>
+    </ul>
+    <div class="arch">
+SELECT e.name, d.dept_name
+FROM employees e
+RIGHT JOIN departments d ON e.dept_id = d.dept_id;
+-- ALL departments returned
+-- If a department has no employees → e.name = NULL
+-- Useful to find departments with no staff:
+WHERE e.emp_id IS NULL</div>
+
+    <h3 style="color:var(--purple);">FULL OUTER JOIN — All Rows from Both</h3>
+    <ul>
+      <li><strong>FULL</strong> = complete. <strong>OUTER</strong> = includes unmatched rows from both sides. <strong>JOIN</strong> = combine. FULL OUTER JOIN returns ALL rows from BOTH tables. Where there is a match, columns from both tables are populated. Where there is no match (from either side), NULLs fill in the missing side.</li>
+      <li><strong>"All rows from both"</strong> — The union of LEFT JOIN and RIGHT JOIN combined. No row from either table is ever excluded.</li>
+      <li>Also called <strong>FULL JOIN</strong> (OUTER is optional).</li>
+      <li><strong>Not supported in MySQL</strong> (use UNION of LEFT JOIN + RIGHT JOIN as a workaround). Supported in: PostgreSQL, SQL Server, Oracle, BigQuery.</li>
+      <li><strong>Common use:</strong> Reconciliation between two datasets — find records in A but not B, in B but not A, and in both. Data quality comparisons. Merging two reference tables that may have different coverage.</li>
+    </ul>
+    <div class="arch">
+SELECT e.name, d.dept_name
+FROM employees e
+FULL OUTER JOIN departments d ON e.dept_id = d.dept_id;
+-- Employees WITHOUT a department: shown with NULL dept_name
+-- Departments WITHOUT employees: shown with NULL e.name
+-- Matching pairs: shown with both sides populated</div>
+
+    <h3 style="color:var(--red);">CROSS JOIN — Cartesian Product</h3>
+    <ul>
+      <li><strong>CROSS</strong> = crossing all combinations. <strong>JOIN</strong> = combine. CROSS JOIN returns every possible combination of rows from the left table with rows from the right table. No join condition is used.</li>
+      <li><strong>"Cartesian product"</strong> — From mathematics: the Cartesian product of sets A × B = all ordered pairs (a, b) where a ∈ A and b ∈ B. If table A has 100 rows and table B has 50 rows → CROSS JOIN returns 100 × 50 = 5,000 rows.</li>
+      <li><strong>Warning:</strong> CROSS JOIN on large tables creates enormous result sets. 1,000 × 1,000 = 1,000,000 rows. Always be careful.</li>
+      <li>No <code>ON</code> clause is used (or needed) — there is no join condition.</li>
+      <li><strong>Common use:</strong> Generate all possible combinations — all products × all stores, all sizes × all colours, all dates × all regions. Used in report frameworks to ensure every combination appears even if no data exists.</li>
+    </ul>
+    <div class="arch">
+SELECT s.size, c.color
+FROM sizes s
+CROSS JOIN colors c;
+-- If sizes has 3 rows (S, M, L) and colors has 4 rows (Red, Blue, Green, Black)
+-- Result: 3 × 4 = 12 rows: (S,Red), (S,Blue), (S,Green), (S,Black), (M,Red)...</div>
+
+    <h3 style="color:#22d3ee;">SELF JOIN — Join Table with Itself</h3>
+    <ul>
+      <li><strong>SELF</strong> = itself. A SELF JOIN is when a table is joined to itself. This is done by giving the table two different aliases to treat it as two separate tables.</li>
+      <li><strong>"Join table with itself"</strong> — The same table appears on both the left and right sides of the join, but with different aliases so SQL can distinguish between the two "copies."</li>
+      <li>Not a separate SQL keyword — it is an INNER JOIN, LEFT JOIN, etc., but both sides reference the same table.</li>
+      <li><strong>Common use cases:</strong>
+        <ul>
+          <li><strong>Employee-Manager hierarchy</strong> — employees table has a <code>manager_id</code> column that references another <code>employee_id</code> in the same table. Self join to find each employee's manager's name.</li>
+          <li><strong>Hierarchical/recursive structures</strong> — org charts, category trees, comment threads.</li>
+          <li><strong>Find duplicates</strong> — join a table to itself on matching column values but different IDs.</li>
+        </ul>
+      </li>
+    </ul>
+    <div class="arch">
+-- Find each employee and their manager's name
+SELECT e.name AS employee, m.name AS manager
+FROM employees e
+INNER JOIN employees m ON e.manager_id = m.emp_id;
+-- 'e' is the employee side, 'm' is the manager side
+-- Both point to the SAME employees table</div>
+  </div>
+
+  <!-- VISUAL SUMMARY -->
+  <div class="dblock">
+    <h3 style="color:var(--orange);">⚡ JOIN Decision Guide</h3>
+    <div class="cheat">
+      <div class="cheat-item"><div class="cheat-q">Only want rows that exist in BOTH tables</div><div class="cheat-a" style="color:var(--blue);">→ <strong>INNER JOIN</strong></div></div>
+      <div class="cheat-item"><div class="cheat-q">Keep ALL rows from the first (left) table</div><div class="cheat-a" style="color:var(--green);">→ <strong>LEFT JOIN</strong></div></div>
+      <div class="cheat-item"><div class="cheat-q">Keep ALL rows from the second (right) table</div><div class="cheat-a" style="color:var(--orange);">→ <strong>RIGHT JOIN</strong></div></div>
+      <div class="cheat-item"><div class="cheat-q">Keep ALL rows from BOTH tables</div><div class="cheat-a" style="color:var(--purple);">→ <strong>FULL OUTER JOIN</strong></div></div>
+      <div class="cheat-item"><div class="cheat-q">Every combination of rows from two tables</div><div class="cheat-a" style="color:var(--red);">→ <strong>CROSS JOIN</strong></div></div>
+      <div class="cheat-item"><div class="cheat-q">Hierarchical data / employee-manager / find duplicates</div><div class="cheat-a" style="color:#22d3ee;">→ <strong>SELF JOIN</strong></div></div>
+      <div class="cheat-item"><div class="cheat-q">Find rows in LEFT that have NO match in RIGHT</div><div class="cheat-a" style="color:var(--green);">→ <strong>LEFT JOIN WHERE right.id IS NULL</strong></div></div>
+      <div class="cheat-item"><div class="cheat-q">Find rows in NEITHER table (unmatched on both sides)</div><div class="cheat-a" style="color:var(--purple);">→ <strong>FULL OUTER JOIN WHERE either IS NULL</strong></div></div>
+    </div>
+
+    <h3 style="color:var(--orange);">Row Count Summary</h3>
+    <div class="twrap" style="margin-bottom:0;">
+      <table>
+        <thead><tr><th>Join Type</th><th>Min rows</th><th>Max rows</th><th>NULLs possible?</th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--blue);font-weight:700;">INNER JOIN</td><td>0</td><td>min(left, right) or more with duplicates</td><td>No (from join columns)</td></tr>
+          <tr><td style="color:var(--green);font-weight:700;">LEFT JOIN</td><td>count(left)</td><td>count(left) × max matches</td><td>Yes (right side)</td></tr>
+          <tr><td style="color:var(--orange);font-weight:700;">RIGHT JOIN</td><td>count(right)</td><td>count(right) × max matches</td><td>Yes (left side)</td></tr>
+          <tr><td style="color:var(--purple);font-weight:700;">FULL OUTER JOIN</td><td>max(left,right)</td><td>count(left) + count(right)</td><td>Yes (both sides)</td></tr>
+          <tr><td style="color:var(--red);font-weight:700;">CROSS JOIN</td><td>count(left) × count(right)</td><td>count(left) × count(right)</td><td>No</td></tr>
+          <tr><td style="color:#22d3ee;font-weight:700;">SELF JOIN</td><td>Depends on join type used</td><td>Depends on join type used</td><td>Depends</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
      JAVASCRIPT
 ══════════════════════════════════════════ -->
 <script>
-  // Track which analytics sub-tab is active
   var activeAnalyticsSub = 'scd';
+  var activeSQLSub = 'string';
 
   function showMain(section, btn) {
-    // Update main buttons
     document.querySelectorAll('.main-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
 
     const gcpBar       = document.getElementById('gcp-subtabbar');
     const analyticsBar = document.getElementById('analytics-subtabbar');
+    const sqlBar       = document.getElementById('sql-subtabbar');
+
+    // Hide all sub-bars first
+    gcpBar.classList.add('hidden');
+    analyticsBar.classList.add('hidden');
+    sqlBar.classList.add('hidden');
+
+    // Hide all GCP panels and standalones
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.standalone').forEach(p => p.classList.remove('active'));
 
     if (section === 'gcp') {
-      // Show GCP sub-tabbar, hide analytics sub-tabbar
       gcpBar.classList.remove('hidden');
-      analyticsBar.classList.add('hidden');
-      // Hide all standalones
-      document.querySelectorAll('.standalone').forEach(p => p.classList.remove('active'));
-      // Make sure the active GCP panel is visible (restore last active .panel)
       const activePanel = document.querySelector('.panel.active');
       if (!activePanel) {
-        // default to overview
         document.getElementById('tab-overview').classList.add('active');
         gcpBar.querySelector('.tab-btn').classList.add('active');
       }
-    } else {
-      // Hide GCP sub-tabbar, show analytics sub-tabbar
-      gcpBar.classList.add('hidden');
+    } else if (section === 'analytics') {
       analyticsBar.classList.remove('hidden');
-      // Hide all GCP panels
-      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-      // Show the last active analytics sub
-      document.querySelectorAll('.standalone').forEach(p => p.classList.remove('active'));
       document.getElementById('tab-' + activeAnalyticsSub).classList.add('active');
+    } else if (section === 'sql') {
+      sqlBar.classList.remove('hidden');
+      document.getElementById('tab-' + activeSQLSub).classList.add('active');
     }
 
     btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
@@ -2263,7 +2797,6 @@ JOIN dim_customer_current_view v ON f.customer_id = v.customer_id;
   }
 
   function showSub(id, btn) {
-    // GCP sub-tabs
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('#gcp-subtabbar .tab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('tab-' + id).classList.add('active');
@@ -2273,10 +2806,19 @@ JOIN dim_customer_current_view v ON f.customer_id = v.customer_id;
   }
 
   function showAnalytics(id, btn) {
-    // Analytics sub-tabs (SCD / SQL Ranking)
     activeAnalyticsSub = id;
     document.querySelectorAll('.standalone').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('#analytics-subtabbar .tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    btn.classList.add('active');
+    btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    window.scrollTo({ top: 0 });
+  }
+
+  function showSQL(id, btn) {
+    activeSQLSub = id;
+    document.querySelectorAll('.standalone').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('#sql-subtabbar .tab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('tab-' + id).classList.add('active');
     btn.classList.add('active');
     btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
