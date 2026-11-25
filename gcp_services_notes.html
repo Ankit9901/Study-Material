@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GCP Services – Complete Study Notes</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --card: #1a1d27;
+      --border: #2a2d3e;
+      --accent-blue: #4f9cf9;
+      --accent-green: #3ecf8e;
+      --accent-orange: #f59e0b;
+      --accent-purple: #a78bfa;
+      --accent-red: #f87171;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --tag-bg: #1e2435;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      line-height: 1.7;
+      padding: 2rem 1rem;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    header h1 {
+      font-size: 2.4rem;
+      background: linear-gradient(135deg, #4f9cf9, #a78bfa, #3ecf8e);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+    header p { color: var(--muted); font-size: 1rem; }
+
+    /* NAV */
+    nav {
+      display: flex; flex-wrap: wrap; gap: 0.75rem;
+      justify-content: center; margin-bottom: 3rem;
+    }
+    nav a {
+      padding: 0.5rem 1.2rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+    nav a:hover { background: var(--border); }
+
+    /* QUICK COMPARE TABLE */
+    .section { max-width: 1200px; margin: 0 auto 4rem; }
+    .section-title {
+      font-size: 1.5rem; font-weight: 700;
+      border-left: 4px solid var(--accent-blue);
+      padding-left: 1rem; margin-bottom: 1.5rem;
+    }
+    .table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; min-width: 700px; }
+    thead tr { background: #1e2435; }
+    th {
+      padding: 1rem 1.2rem; text-align: left;
+      font-size: 0.85rem; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 0.9rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      font-size: 0.93rem;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:nth-child(even) td { background: #13161f; }
+    .badge {
+      display: inline-block; padding: 0.2rem 0.6rem;
+      border-radius: 6px; font-size: 0.75rem; font-weight: 600;
+    }
+    .badge-blue  { background: #1d3a6e; color: #93c5fd; }
+    .badge-green { background: #14432a; color: #6ee7b7; }
+    .badge-orange{ background: #442a05; color: #fcd34d; }
+    .badge-purple{ background: #2e1a5e; color: #c4b5fd; }
+    .badge-red   { background: #450a0a; color: #fca5a5; }
+
+    /* SERVICE CARDS */
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    }
+    .card.dataflow::before  { background: var(--accent-blue); }
+    .card.dataproc::before  { background: var(--accent-orange); }
+    .card.composer::before  { background: var(--accent-green); }
+    .card.pubsub::before    { background: var(--accent-purple); }
+
+    .card-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .card h3 { font-size: 1.25rem; margin-bottom: 0.4rem; }
+    .card .subtitle { font-size: 0.8rem; color: var(--muted); margin-bottom: 1rem; }
+    .card p { font-size: 0.9rem; color: #cbd5e1; }
+
+    /* DETAIL SECTIONS */
+    .detail-block {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    .detail-block h2 {
+      font-size: 1.6rem; margin-bottom: 0.3rem;
+      display: flex; align-items: center; gap: 0.6rem;
+    }
+    .detail-block .tagline {
+      color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem;
+    }
+    .detail-block h3 {
+      font-size: 1rem; color: var(--accent-blue);
+      margin: 1.4rem 0 0.5rem; text-transform: uppercase;
+      letter-spacing: 0.06em; font-weight: 700;
+    }
+    .detail-block p { font-size: 0.95rem; color: #cbd5e1; margin-bottom: 0.6rem; }
+    .detail-block ul { padding-left: 1.4rem; }
+    .detail-block ul li { font-size: 0.95rem; color: #cbd5e1; margin-bottom: 0.4rem; }
+    .detail-block ul li strong { color: var(--text); }
+    .highlight-box {
+      background: #1e2435; border-left: 3px solid var(--accent-blue);
+      border-radius: 0 8px 8px 0; padding: 0.8rem 1rem;
+      margin: 0.8rem 0; font-size: 0.9rem; color: #94a3b8;
+    }
+    .highlight-box strong { color: var(--text); }
+
+    /* COLOR OVERRIDES PER SERVICE */
+    .dataflow-accent h3, .dataflow-accent .highlight-box { border-color: var(--accent-blue); }
+    .dataproc-accent h3  { color: var(--accent-orange); }
+    .dataproc-accent .highlight-box { border-color: var(--accent-orange); }
+    .composer-accent h3  { color: var(--accent-green); }
+    .composer-accent .highlight-box { border-color: var(--accent-green); }
+    .pubsub-accent h3    { color: var(--accent-purple); }
+    .pubsub-accent .highlight-box { border-color: var(--accent-purple); }
+
+    /* TERM GLOSSARY */
+    .glossary { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+    .term-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.1rem 1.3rem;
+    }
+    .term-card .term { font-weight: 700; color: var(--accent-blue); margin-bottom: 0.3rem; font-size: 0.95rem; }
+    .term-card p { font-size: 0.88rem; color: #94a3b8; }
+
+    /* FOOTER */
+    footer {
+      text-align: center; color: var(--muted); font-size: 0.82rem; margin-top: 4rem;
+      border-top: 1px solid var(--border); padding-top: 1.5rem;
+    }
+
+    @media (max-width: 600px) {
+      header h1 { font-size: 1.6rem; }
+      .detail-block { padding: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Google Cloud Platform – Services Deep Dive</h1>
+  <p>Complete notes: Dataflow · Dataproc · Composer · Pub/Sub — every word explained</p>
+</header>
+
+<nav>
+  <a href="#compare">Quick Compare</a>
+  <a href="#dataflow">Dataflow</a>
+  <a href="#dataproc">Dataproc</a>
+  <a href="#composer">Composer</a>
+  <a href="#pubsub">Pub/Sub</a>
+  <a href="#glossary">Glossary</a>
+</nav>
+
+
+<!-- ============================================================
+     OVERVIEW CARDS
+============================================================ -->
+<section class="section">
+  <h2 class="section-title">Service Overview</h2>
+  <div class="cards">
+
+    <div class="card dataflow">
+      <div class="card-icon">🌊</div>
+      <h3>Dataflow</h3>
+      <p class="subtitle">Fully Managed · Serverless · Apache Beam</p>
+      <p>Google's unified stream and batch data processing service. Write once in Beam, run on any runner — Dataflow handles all infrastructure automatically.</p>
+    </div>
+
+    <div class="card dataproc">
+      <div class="card-icon">🔥</div>
+      <h3>Dataproc</h3>
+      <p class="subtitle">Managed Hadoop/Spark · Cluster-based</p>
+      <p>Run Apache Spark, Hadoop, Hive, Pig and more on GCP. Best for lifting existing big-data workloads into the cloud with minimal code change.</p>
+    </div>
+
+    <div class="card composer">
+      <div class="card-icon">🎼</div>
+      <h3>Cloud Composer</h3>
+      <p class="subtitle">Managed Apache Airflow · Workflow Orchestration</p>
+      <p>Author, schedule, and monitor data pipelines as DAGs (Directed Acyclic Graphs) using Apache Airflow — fully managed by GCP.</p>
+    </div>
+
+    <div class="card pubsub">
+      <div class="card-icon">📡</div>
+      <h3>Pub/Sub</h3>
+      <p class="subtitle">Real-time Messaging · Publish-Subscribe</p>
+      <p>Asynchronous message bus. Producers publish to topics; consumers subscribe and pull/push messages. Decouples services at massive scale.</p>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     QUICK COMPARE TABLE
+============================================================ -->
+<section class="section" id="compare">
+  <h2 class="section-title">Quick Comparison Table</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Dataflow</th>
+          <th>Dataproc</th>
+          <th>Composer</th>
+          <th>Pub/Sub</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Processing Type</strong></td>
+          <td><span class="badge badge-blue">Batch</span> <span class="badge badge-blue">Streaming</span><br/><small style="color:var(--muted)">via Apache Beam · P3</small></td>
+          <td><span class="badge badge-orange">Mostly Batch</span><br/><small style="color:var(--muted)">Spark Streaming exists</small></td>
+          <td><span class="badge badge-green">Workflow Scheduling</span></td>
+          <td><span class="badge badge-purple">Real-time Messaging</span></td>
+        </tr>
+        <tr>
+          <td><strong>Serverless</strong></td>
+          <td><span class="badge badge-green">Yes ✓</span></td>
+          <td><span class="badge badge-red">No – Cluster-based</span></td>
+          <td><span class="badge badge-green">Yes ✓</span></td>
+          <td><span class="badge badge-green">Yes ✓</span></td>
+        </tr>
+        <tr>
+          <td><strong>Programming Model</strong></td>
+          <td>Apache Beam<br/><small style="color:var(--muted)">Python, Java, Go</small></td>
+          <td>Spark / Hadoop<br/><small style="color:var(--muted)">Java, Python, Scala</small></td>
+          <td>Python DAGs<br/><small style="color:var(--muted)">Apache Airflow</small></td>
+          <td>REST / gRPC SDKs<br/><small style="color:var(--muted)">All major languages</small></td>
+        </tr>
+        <tr>
+          <td><strong>Use Case Focus</strong></td>
+          <td>ETL, real-time pipelines</td>
+          <td>Legacy migration, ML, analytics</td>
+          <td>Pipeline orchestration, scheduling</td>
+          <td>Publishers send messages to a topic</td>
+        </tr>
+        <tr>
+          <td><strong>Management</strong></td>
+          <td>Fully managed, auto-scaled</td>
+          <td>You manage cluster size/configs</td>
+          <td>Fully managed — GCP handles Airflow installation, upgrades, scaling &amp; monitoring</td>
+          <td>Subscribers pull or receive messages from that topic via a subscription</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     DATAFLOW DETAIL
+============================================================ -->
+<section class="section" id="dataflow">
+  <h2 class="section-title" style="border-color:var(--accent-blue)">Dataflow — Deep Dive</h2>
+
+  <div class="detail-block dataflow-accent">
+    <h2>🌊 Google Cloud Dataflow</h2>
+    <p class="tagline">A fully managed, serverless data processing service used for batch and streaming data pipelines, based on the Apache Beam programming model.</p>
+
+    <h3>Definition (word-by-word)</h3>
+    <ul>
+      <li><strong>Google Cloud</strong> — GCP (Google Cloud Platform), Google's suite of cloud computing services hosted in Google's global data centers.</li>
+      <li><strong>Dataflow</strong> — The name of the service. "Data" = the information being processed. "Flow" = the movement/transformation of that data through a pipeline — like water flowing through pipes, being filtered and transformed along the way.</li>
+      <li><strong>Fully managed</strong> — Google manages ALL infrastructure: servers, OS updates, patches, networking, monitoring, restarts. You only write code; Google runs the machines.</li>
+      <li><strong>Serverless</strong> — There are <em>no</em> servers you provision or see. You don't pick VM sizes, start clusters, or shut them down. Resources are allocated invisibly and automatically on demand. You pay only for actual usage, not for idle machines.</li>
+      <li><strong>Data processing service</strong> — A service whose core job is to read data, transform it (clean, aggregate, join, enrich), and write it somewhere else. It processes — it doesn't store or query interactively.</li>
+      <li><strong>Batch</strong> — Processing a finite, bounded set of data that already exists. Example: process last month's sales records at midnight. Has a defined start and end.</li>
+      <li><strong>Streaming</strong> — Processing an infinite, continuous, unbounded flow of data as it arrives in real time. Example: process every click event from a website the moment it happens.</li>
+      <li><strong>Data pipelines</strong> — A sequence of steps (stages) that data passes through: Read → Transform → Write. Like an assembly line for data.</li>
+      <li><strong>Apache Beam</strong> — An open-source unified programming model (SDK) for building both batch and streaming pipelines. "Beam" = Batch + strEAM. Write your pipeline once in Beam; run it on Dataflow (or Spark, Flink, etc.).</li>
+      <li><strong>Programming model</strong> — The mental framework and API you use to write your data transformations. Beam's model: PCollections (parallel collections of data) + PTransforms (parallel transformations on that data).</li>
+    </ul>
+
+    <h3>Processing Type: Batch + Streaming (via Beam) P3</h3>
+    <div class="highlight-box">
+      <strong>P3</strong> refers to Dataflow's pricing/runner tier. Dataflow Prime (sometimes noted as the 3rd generation of Dataflow runner) brings vertical autoscaling and right-fitting of worker resources automatically.
+    </div>
+    <ul>
+      <li><strong>Batch processing</strong> — You have a complete dataset (e.g., a CSV file, a database table). You run the pipeline once, process all records, and the job ends. Example: nightly ETL to load a data warehouse.</li>
+      <li><strong>Streaming processing (via Beam)</strong> — Data flows in continuously (e.g., from Pub/Sub). The pipeline runs forever, processing each new record as it arrives. Example: live fraud detection, real-time dashboards.</li>
+      <li><strong>"via Beam"</strong> — Both modes use the same Apache Beam API. The same code handles batch and stream — Beam abstracts the difference. Only the runner (Dataflow) knows whether the source is bounded or unbounded.</li>
+    </ul>
+
+    <h3>Serverless: Yes</h3>
+    <ul>
+      <li>No cluster to create. No VM to choose. No autoscaling rules to configure manually.</li>
+      <li>Dataflow automatically determines how many workers are needed, spins them up, scales during the job, and tears them down when done.</li>
+      <li>Billing is per-vCPU-second and per-GB-second of RAM used, not per hour of reserved instances.</li>
+    </ul>
+
+    <h3>Programming: Apache Beam (Python, Java, Go)</h3>
+    <ul>
+      <li><strong>Python</strong> — Most popular for data engineers and data scientists. Easiest to prototype quickly.</li>
+      <li><strong>Java</strong> — The original Beam language. Most mature SDK. Used in enterprise environments.</li>
+      <li><strong>Go</strong> — Newer Beam SDK. High performance, used for high-throughput scenarios.</li>
+      <li>Key Beam concepts: <strong>Pipeline</strong> (the job), <strong>PCollection</strong> (distributed dataset), <strong>PTransform</strong> (operation: ParDo, GroupByKey, Combine, Flatten, Partition), <strong>Runner</strong> (execution engine — Dataflow is a runner).</li>
+    </ul>
+
+    <h3>Use Case Focus: ETL, Real-time Pipelines</h3>
+    <ul>
+      <li><strong>ETL</strong> = Extract, Transform, Load. The classic data engineering pattern:
+        <ul>
+          <li><strong>Extract</strong> — Pull data from a source (database, API, file storage, Pub/Sub).</li>
+          <li><strong>Transform</strong> — Clean it (remove nulls), enrich it (add columns), aggregate it (sum by region), join it (merge two datasets).</li>
+          <li><strong>Load</strong> — Write to a destination (BigQuery, Cloud Storage, Bigtable, database).</li>
+        </ul>
+      </li>
+      <li><strong>Real-time pipelines</strong> — Continuous pipelines that process data within milliseconds to seconds of arrival. Used for live analytics, alerting systems, event-driven architectures.</li>
+    </ul>
+
+    <h3>Management: Fully Managed, Auto-Scaled</h3>
+    <ul>
+      <li><strong>Fully managed</strong> — Zero infrastructure ops. No SSH into workers. No monitoring of cluster health. No OS patches.</li>
+      <li><strong>Auto-scaled</strong> — Dataflow's autoscaler watches your pipeline's throughput and backlog. If data is piling up, it adds workers. If the pipeline is idle or finishing, it removes workers. This is Horizontal Autoscaling (adding/removing VMs) and can also right-fit worker shapes (Dataflow Prime).</li>
+    </ul>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     DATAPROC DETAIL
+============================================================ -->
+<section class="section" id="dataproc">
+  <h2 class="section-title" style="border-color:var(--accent-orange)">Dataproc — Deep Dive</h2>
+
+  <div class="detail-block dataproc-accent">
+    <h2>🔥 Google Cloud Dataproc</h2>
+    <p class="tagline">A fully managed and fast cloud service by Google Cloud for running Apache Spark, Apache Hadoop, and other open-source big data tools.</p>
+
+    <h3>Definition (word-by-word)</h3>
+    <ul>
+      <li><strong>Google Cloud Dataproc</strong> — "Data" + "proc" (processing). GCP's managed service for running open-source distributed computing frameworks.</li>
+      <li><strong>Fully managed</strong> — Google provisions clusters, installs Spark/Hadoop, manages OS, networking, and security. Cluster operations (create/delete/resize) take 90 seconds vs. hours for self-managed.</li>
+      <li><strong>Fast</strong> — Clusters spin up in ~90 seconds (traditional Hadoop clusters take 10–20 minutes). Also, it uses Google's high-speed internal network.</li>
+      <li><strong>Cloud service</strong> — Runs entirely on GCP infrastructure. Data is typically in Cloud Storage (GCS), not HDFS (Hadoop's local disk storage).</li>
+      <li><strong>Apache Spark</strong> — An open-source, in-memory distributed computing engine. "In-memory" = data is processed in RAM, not read/written to disk at every step → much faster than MapReduce. Used for large-scale data processing, ML (MLlib), SQL (Spark SQL), and streaming (Structured Streaming).</li>
+      <li><strong>Apache Hadoop</strong> — The original big data framework. Consists of: HDFS (distributed file system), YARN (resource manager), MapReduce (batch computation). Older than Spark, disk-based, but still widely used.</li>
+      <li><strong>Open-source big data tools</strong> — Dataproc also supports: Hive (SQL over Hadoop), Pig (scripting language for MapReduce), Presto (fast SQL), Jupyter (notebooks), Zeppelin (interactive notebooks), Flink (stream processing).</li>
+    </ul>
+
+    <h3>Processing Type: Mostly Batch (Spark Streaming exists)</h3>
+    <ul>
+      <li><strong>Mostly batch</strong> — The primary and most common use case is batch: process a large static dataset (files in GCS, tables in BigQuery). Jobs have a defined end.</li>
+      <li><strong>Spark Streaming exists</strong> — Spark includes a streaming module (Structured Streaming) that can process live data from Kafka or Pub/Sub. However, this is not Dataproc's primary strength. Dataflow is preferred for real-time streaming on GCP.</li>
+    </ul>
+
+    <h3>Serverless: No (Cluster-based)</h3>
+    <ul>
+      <li><strong>Cluster-based</strong> — You explicitly create a Dataproc cluster specifying: machine type (n1-standard-4, etc.), number of worker nodes, disk size, preemptible (spot) VMs, optional components (Jupyter, Presto, etc.).</li>
+      <li>The cluster persists until you delete it. You are billed for every second the cluster exists, even if no jobs are running.</li>
+      <li><strong>Dataproc Serverless</strong> — A newer option that removes cluster management for Spark batch jobs. But the classic Dataproc is cluster-based as described in the notes.</li>
+    </ul>
+
+    <h3>Programming: Spark, Hadoop (Java, Python, Scala)</h3>
+    <ul>
+      <li><strong>Java</strong> — Original language for both Hadoop MapReduce and Spark. Verbose but fast and type-safe.</li>
+      <li><strong>Python</strong> — PySpark (Python API for Spark). Most popular today among data engineers. Easy to prototype.</li>
+      <li><strong>Scala</strong> — Spark is written in Scala. The most performant way to write Spark jobs. Functional programming style. Compiles to JVM bytecode.</li>
+    </ul>
+
+    <h3>Use Case Focus: Legacy Migration, ML, Analytics</h3>
+    <ul>
+      <li><strong>Legacy migration</strong> — Organizations running on-premises Hadoop clusters can "lift and shift" to Dataproc with minimal code changes. Same Spark/Hadoop APIs, but on GCP. Migrate without rewriting your entire codebase.</li>
+      <li><strong>ML (Machine Learning)</strong> — Spark MLlib provides distributed ML algorithms (classification, regression, clustering, collaborative filtering). Train models on datasets too large for a single machine.</li>
+      <li><strong>Analytics</strong> — Run large-scale analytical queries using Hive or Spark SQL over petabytes of data stored in Cloud Storage.</li>
+    </ul>
+
+    <h3>Management: You Manage Cluster Size/Configs</h3>
+    <ul>
+      <li>YOU choose: how many master nodes (usually 1 or 3 for HA), how many worker nodes, VM sizes, disk types, network settings, IAM permissions, initialization scripts.</li>
+      <li>YOU decide when to scale: manually resize the cluster, or configure Autoscaling Policies (but you define the min/max bounds).</li>
+      <li>YOU are responsible for: not leaving idle clusters running (wasting money), choosing the right machine type for your workload, managing Hadoop configurations (yarn-site.xml, spark-defaults.conf).</li>
+    </ul>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     COMPOSER DETAIL
+============================================================ -->
+<section class="section" id="composer">
+  <h2 class="section-title" style="border-color:var(--accent-green)">Cloud Composer — Deep Dive</h2>
+
+  <div class="detail-block composer-accent">
+    <h2>🎼 Google Cloud Composer</h2>
+    <p class="tagline">A fully managed workflow orchestration service built on Apache Airflow.</p>
+
+    <h3>Definition (word-by-word)</h3>
+    <ul>
+      <li><strong>Google Cloud Composer</strong> — "Composer" = someone who orchestrates a musical composition. Here it orchestrates data workflows — telling each instrument (service/task) when to play.</li>
+      <li><strong>Fully managed</strong> — GCP installs Airflow, manages the web server, the scheduler, the metadata database, the worker pool, and all updates.</li>
+      <li><strong>Workflow orchestration service</strong> —
+        <ul>
+          <li><strong>Workflow</strong> — A sequence of dependent tasks. Task B runs after Task A succeeds. Task C and D can run in parallel after B.</li>
+          <li><strong>Orchestration</strong> — Coordinating when and how each step runs. Setting dependencies, handling retries, sending alerts on failure.</li>
+          <li><strong>Service</strong> — Delivered as a GCP product. No need to self-host Airflow.</li>
+        </ul>
+      </li>
+      <li><strong>Apache Airflow</strong> — An open-source platform (originally created by Airbnb in 2014) to programmatically author, schedule, and monitor workflows. Workflows are written as Python DAGs.</li>
+    </ul>
+
+    <h3>What is a DAG?</h3>
+    <div class="highlight-box">
+      <strong>DAG</strong> = Directed Acyclic Graph. <strong>Directed</strong> = tasks have direction (A → B, not B → A). <strong>Acyclic</strong> = no cycles (no task can depend on itself, directly or indirectly). <strong>Graph</strong> = a set of nodes (tasks) connected by edges (dependencies). Each node is a task; each edge says "run me after this other task succeeds."
+    </div>
+
+    <h3>Processing Type: Workflow Scheduling / Orchestration</h3>
+    <ul>
+      <li>Composer does NOT process data itself. It <em>coordinates</em> other services that process data.</li>
+      <li>Example DAG: (1) Trigger a Dataflow job → (2) When it finishes, run a BigQuery query → (3) Export results to Cloud Storage → (4) Send a Slack notification.</li>
+      <li>Composer manages this entire sequence: scheduling, retries, dependencies, alerting.</li>
+    </ul>
+
+    <h3>Management: Fully Managed by GCP</h3>
+    <ul>
+      <li><strong>Airflow installation</strong> — GCP installs the correct version of Airflow for you. No pip install, no environment setup.</li>
+      <li><strong>Upgrades</strong> — GCP upgrades Airflow versions with minimal downtime. No manual migration work.</li>
+      <li><strong>Scaling</strong> — Composer automatically scales the number of Airflow workers up or down based on how many DAG runs are queued.</li>
+      <li><strong>Monitoring</strong> — Integrated with Cloud Monitoring and Cloud Logging. Airflow logs are streamed to Cloud Logging automatically. You get dashboards for DAG run health out of the box.</li>
+    </ul>
+
+    <h3>Use Case Focus: Pipeline Orchestration, Scheduling</h3>
+    <ul>
+      <li>Schedule nightly ETL jobs (e.g., "run this Dataflow job every day at 2 AM").</li>
+      <li>Manage complex multi-step ML pipelines: data prep → training → evaluation → deployment.</li>
+      <li>Cross-service coordination: BigQuery → Dataproc → Cloud Storage → Email notification, all in one DAG.</li>
+      <li>Dependency management: "Don't run step 3 until step 1 AND step 2 both succeed."</li>
+      <li>Retry policies: "If the task fails, retry 3 times with exponential backoff."</li>
+    </ul>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     PUB/SUB DETAIL
+============================================================ -->
+<section class="section" id="pubsub">
+  <h2 class="section-title" style="border-color:var(--accent-purple)">Pub/Sub — Deep Dive</h2>
+
+  <div class="detail-block pubsub-accent">
+    <h2>📡 Google Cloud Pub/Sub</h2>
+    <p class="tagline">A real-time messaging service that lets applications communicate asynchronously by sending and receiving messages via topics and subscriptions.</p>
+
+    <h3>Definition (word-by-word)</h3>
+    <ul>
+      <li><strong>Google Cloud Pub/Sub</strong> — "Pub" = Publish. "Sub" = Subscribe. The Publish-Subscribe messaging pattern. A globally scalable, fully managed message bus.</li>
+      <li><strong>Real-time messaging service</strong> — Messages are delivered within milliseconds of being published. "Real-time" = extremely low latency, not batch. "Messaging" = data is packaged as discrete messages (not streams of bytes).</li>
+      <li><strong>Applications communicate asynchronously</strong> —
+        <ul>
+          <li><strong>Asynchronously</strong> — The sender (publisher) does NOT wait for the receiver (subscriber) to process the message. It fires and forgets. The receiver processes it whenever it is ready. This decouples producer and consumer.</li>
+          <li><strong>Synchronous</strong> (the opposite) — The caller waits for a response before continuing. Example: a REST API call. If the server is slow, the caller is blocked.</li>
+        </ul>
+      </li>
+      <li><strong>Sending and receiving messages</strong> — Publishers send messages. Subscribers receive them. These are independent operations — publisher doesn't know who will receive the message.</li>
+      <li><strong>Topics</strong> — A named channel or feed to which publishers send messages. Example: "user-clicks", "order-placed", "sensor-readings". A publisher sends to a topic, not to a specific subscriber.</li>
+      <li><strong>Subscriptions</strong> — A named resource that represents a subscriber's interest in a topic. Multiple subscriptions can exist on one topic — each subscription receives ALL messages independently (fan-out).</li>
+    </ul>
+
+    <h3>Use Case Focus: Publishers Send Messages to a Topic</h3>
+    <div class="highlight-box">
+      <strong>Flow:</strong> Publisher → Topic → Subscription → Subscriber<br/><br/>
+      Publisher: "I have a new order" → publishes to topic "orders".<br/>
+      Subscription A (Inventory Service) receives it → updates stock.<br/>
+      Subscription B (Email Service) receives it → sends confirmation email.<br/>
+      Subscription C (Analytics) receives it → logs to BigQuery.
+    </div>
+    <ul>
+      <li><strong>Decoupling</strong> — The order service doesn't know or care about inventory/email/analytics. It just publishes. New consumers can be added without changing the publisher.</li>
+      <li><strong>Fan-out</strong> — One message published to a topic is delivered to ALL subscriptions on that topic independently.</li>
+      <li><strong>Buffering</strong> — If a subscriber is temporarily down, messages are retained (up to 7 days by default). No messages are lost.</li>
+      <li><strong>Load balancing</strong> — Multiple instances of the same subscriber share a subscription → messages are distributed across them (not duplicated). This allows horizontal scaling of consumers.</li>
+    </ul>
+
+    <h3>Management: Subscribers Pull or Receive Messages via a Subscription</h3>
+    <ul>
+      <li><strong>Pull delivery</strong> — The subscriber actively requests messages from Pub/Sub. "Hey, do you have anything for me?" Used when the subscriber controls the consumption rate.</li>
+      <li><strong>Push delivery</strong> — Pub/Sub actively sends messages to a subscriber's HTTP/HTTPS endpoint (webhook). "Hey subscriber, here's a new message." Used for event-driven serverless functions (Cloud Run, Cloud Functions).</li>
+      <li><strong>Acknowledgement (ack)</strong> — After processing a message, the subscriber sends an "ack" to Pub/Sub to confirm delivery. If the ack deadline expires without an ack, Pub/Sub re-delivers the message (at-least-once delivery).</li>
+    </ul>
+
+    <h3>Serverless: Yes</h3>
+    <ul>
+      <li>No infrastructure to manage. No brokers to run, no Kafka clusters to maintain.</li>
+      <li>Fully serverless and globally distributed. Scales to millions of messages per second automatically.</li>
+      <li>GCP handles durability, replication, and delivery guarantees.</li>
+    </ul>
+
+    <h3>Common Pub/Sub Use Cases</h3>
+    <ul>
+      <li>Ingesting IoT sensor data into BigQuery or Dataflow.</li>
+      <li>Event-driven microservices communication.</li>
+      <li>Streaming logs from applications to storage.</li>
+      <li>Triggering Cloud Functions on events (file uploaded, record created).</li>
+      <li>Decoupling frontend click events from backend analytics processing.</li>
+    </ul>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     GLOSSARY
+============================================================ -->
+<section class="section" id="glossary">
+  <h2 class="section-title">Complete Glossary — Every Key Term</h2>
+  <div class="glossary">
+
+    <div class="term-card">
+      <div class="term">Apache Beam</div>
+      <p>Unified open-source SDK to build both batch and streaming pipelines. "Beam" = Batch + strEAM. Run on Dataflow, Spark, Flink.</p>
+    </div>
+
+    <div class="term-card">
+      <div class="term">Apache Spark</div>
+      <p>In-memory distributed data processing engine. Much faster than Hadoop MapReduce. Supports SQL, ML, streaming, graph processing.</p>
+    </div>
+
+    <div class="term-card">
+      <div class="term">Apache Hadoop</div>
+      <p>Original big data framework. Includes HDFS (storage) + MapReduce (compute) + YARN (resource management). Disk-based, batch-only.</p>
+    </div>
+
+    <div class="term-card">
+      <div class="term">Apache Airflow</div>
+      <p>Open-source workflow orchestration platform. Write DAGs in Python to schedule and monitor tasks across any system.</p>
+    </div>
+
+    <div class="term-card">
+      <div class="term">ETL</div>
+      <p>Extract → Transform → Load. The standard pattern for moving data between systems while cleaning and reshaping it.</p>
+    </div>
+
+    <div class="term-card">
+      <div class="term">Batch Processing</div>
+      <p>Process a finite, bounded dataset in one job run. Has a clear start and end. Example: daily report generation.</p>
+    </div>
+
+    <div class="term-card">
+      <div class="term">Stream Processing</div>
+      <p>Process an infinite, continuous flow of data as it arrives. No end. Example: live fraud detection on card transactions.</p>
+    </div>
+
+    <div class="term-card">
+      <div class="term">Serverless</div>
+      <p>No infrastructure to provision or manage. Cloud auto-scales and bills per usage. You only write and deploy code.</p>
+    </div>
+
+    <div class="term-card">
+      <div class="term">Cluster-based</div>
+      <p>You provision a group of VMs (a cluster). You choose count and size. You manage its lifecycle. Example: Dataproc clusters.</p>
+    </div>
+
+    <div class="term-card">
+      <div class="term">Fully Managed</div>
+      <p>The cloud provider handles all operational tasks: installation, upgrades, monitoring, scaling, patching. You focus on logic.</p>
+    </div>
+
+    <div class="term-card">
+      <div class="term">Auto-scaled</div>
+      <p>The system automatically adds or removes compute resources based on current load, without manual intervention.</p>
+    </div>
+
+    <div class="term-card">
+      <div class="term">DAG</div>
+      <p>Directed Acyclic Graph. Nodes = tasks, edges = dependencies. No cycles allowed. Used in Airflow/Composer to define workflow order.</p>
+    </div>
+
+    <div class="term-card">
+      <div class="term">Topic (Pub/Sub)</div>
+      <p>A named channel in Pub/Sub to which publishers send messages. Subscribers don't connect to publishers — they connect to topics.</p>
+    </div>
+
+    <div class="term-card">
+      <div class="term">Subscription (Pub/Sub)</div>
+      <p>A named resource that represents interest in a topic. Each subscription receives all messages independently (fan-out).</p>
+    </div>
+
+    <div class="term-card">
+      <div class="term">Publisher</div>
+      <p>An application or service that creates and sends messages to a Pub/Sub topic. Does not know who the subscribers are.</p>
+    </div>
+
+    <div class="term-card">
+      <div class="term">Subscriber</div>
+      <p>An application or service that receives messages from a Pub/Sub subscription. Pulls or is pushed messages.</p>
+    </div>
+
+    <div class="term-card">
+      <div class="term">Asynchronous</div>
+      <p>The sender does not wait for the receiver to process the message. Fire and forget. Enables loose coupling between services.</p>
+    </div>
+
+    <div class="term-card">
+      <div class="term">Legacy Migration</div>
+      <p>Moving existing on-premises workloads (old Hadoop clusters) to the cloud with minimal code changes. Dataproc's strength.</p>
+    </div>
+
+    <div class="term-card">
+      <div class="term">PCollection</div>
+      <p>Beam's distributed dataset. Can be bounded (batch) or unbounded (stream). Every Beam transformation takes PCollections as input/output.</p>
+    </div>
+
+    <div class="term-card">
+      <div class="term">PTransform</div>
+      <p>A data processing step in Apache Beam. ParDo (map), GroupByKey (shuffle), Combine (reduce), Flatten (merge), Partition (split).</p>
+    </div>
+
+    <div class="term-card">
+      <div class="term">Orchestration</div>
+      <p>Coordinating the execution order of multiple tasks/services. Defining: what runs when, in what order, what to do on failure.</p>
+    </div>
+
+    <div class="term-card">
+      <div class="term">GCP</div>
+      <p>Google Cloud Platform. Google's cloud computing product suite: compute, storage, databases, networking, ML, analytics, and more.</p>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     WHEN TO USE WHICH
+============================================================ -->
+<section class="section">
+  <h2 class="section-title">When to Use Which Service</h2>
+  <div class="detail-block">
+    <h3 style="color:var(--accent-blue)">Use Dataflow when...</h3>
+    <ul>
+      <li>You need real-time streaming <em>and</em> batch in one unified pipeline.</li>
+      <li>You want fully serverless — zero cluster management.</li>
+      <li>Your team writes in Python, Java, or Go using Apache Beam.</li>
+      <li>You are building new ETL pipelines on GCP from scratch.</li>
+    </ul>
+
+    <h3 style="color:var(--accent-orange)">Use Dataproc when...</h3>
+    <ul>
+      <li>You have existing Spark or Hadoop jobs to migrate to the cloud.</li>
+      <li>You need to run ML training jobs with Spark MLlib.</li>
+      <li>You want to use Hive, Pig, Presto, or other Hadoop ecosystem tools.</li>
+      <li>You are comfortable managing cluster sizing yourself for cost optimization.</li>
+    </ul>
+
+    <h3 style="color:var(--accent-green)">Use Cloud Composer when...</h3>
+    <ul>
+      <li>You need to schedule and sequence multiple jobs across different GCP services.</li>
+      <li>Your pipelines have complex dependencies (task A before B and C, then D).</li>
+      <li>You want retry logic, alerting, and a visual DAG monitoring UI.</li>
+      <li>You already use Apache Airflow on-premises and want a managed version.</li>
+    </ul>
+
+    <h3 style="color:var(--accent-purple)">Use Pub/Sub when...</h3>
+    <ul>
+      <li>You need to decouple services — producer should not know about consumers.</li>
+      <li>You need to fan-out one event to multiple downstream systems.</li>
+      <li>You are ingesting high-volume real-time events (IoT, clickstreams, logs).</li>
+      <li>You need a buffer between a fast producer and a slow consumer.</li>
+    </ul>
+  </div>
+</section>
+
+
+<footer>
+  <p>GCP Services Study Notes — Dataflow · Dataproc · Cloud Composer · Pub/Sub</p>
+  <p style="margin-top:0.4rem">Generated for exam and interview preparation · 2024</p>
+</footer>
+
+</body>
+</html>
