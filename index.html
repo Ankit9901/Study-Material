@@ -153,6 +153,34 @@
 
     code { background:#0f1117; padding:0.1rem 0.3rem; border-radius:3px; color:var(--muted); font-size:0.85em; }
 
+    /* ── MAIN TAB BAR (level 1) ── */
+    .main-tabbar {
+      position: sticky; top: 0; z-index: 102;
+      background: #090c12;
+      border-bottom: 2px solid #1e2435;
+      display: flex; overflow-x: auto; gap: 0;
+      scrollbar-width: none; height: 50px;
+    }
+    .main-tabbar::-webkit-scrollbar { display: none; }
+    .main-btn {
+      flex-shrink: 0; padding: 0 1.6rem; height: 100%;
+      border: none; border-bottom: 3px solid transparent;
+      background: transparent; color: var(--muted);
+      font-size: 0.88rem; font-weight: 700; cursor: pointer;
+      white-space: nowrap; letter-spacing: 0.04em;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .main-btn:hover { color: var(--text); }
+    .main-btn.active { color: var(--text); border-bottom-color: var(--orange); }
+
+    /* ── SUB TAB BAR (level 2, GCP only) ── */
+    .tabbar { top: 50px; z-index: 101; }   /* push below main bar */
+    .tabbar.hidden { display: none; }
+
+    /* standalone panels (Ranking / SCD) fill whole page */
+    .standalone { display: none; padding: 2rem 1rem 4rem; max-width: 1200px; margin: 0 auto; }
+    .standalone.active { display: block; }
+
     @media(max-width:600px) {
       .panel { padding:1.2rem 0.75rem 3rem; }
       .dblock { padding:1.1rem; }
@@ -164,21 +192,34 @@
 <!-- ══════════════════════════════════════════
      STICKY TAB BAR
 ══════════════════════════════════════════ -->
-<div class="tabbar" id="tabbar">
-  <button class="tab-btn active" onclick="show('overview',this)">🏠 Overview</button>
-  <button class="tab-btn" onclick="show('dataflow',this)">🌊 Dataflow</button>
-  <button class="tab-btn" onclick="show('dataproc',this)">🔥 Dataproc</button>
-  <button class="tab-btn" onclick="show('composer',this)">🎼 Composer</button>
-  <button class="tab-btn" onclick="show('pubsub',this)">📡 Pub/Sub</button>
-  <button class="tab-btn" onclick="show('ingestion',this)">📥 Ingestion</button>
-  <button class="tab-btn" onclick="show('processing',this)">⚙️ Processing</button>
-  <button class="tab-btn" onclick="show('streaming',this)">🌊 Streaming</button>
-  <button class="tab-btn" onclick="show('storage',this)">🗄️ Storage</button>
-  <button class="tab-btn" onclick="show('orchestration',this)">🎯 Orchestration</button>
-  <button class="tab-btn" onclick="show('monitoring',this)">📊 Monitoring</button>
-  <button class="tab-btn" onclick="show('stack',this)">🏆 Stack</button>
-  <button class="tab-btn" onclick="show('gcs',this)">🧊 GCS Classes</button>
-  <button class="tab-btn" onclick="show('glossary',this)">📖 Glossary</button>
+<!-- ── LEVEL 1: MAIN TAB BAR ── -->
+<div class="main-tabbar">
+  <button class="main-btn active" onclick="showMain('gcp',this)">☁️ Google Cloud Platform</button>
+  <button class="main-btn" onclick="showMain('analytics',this)">📦 SCD &amp; SQL Analytics</button>
+</div>
+
+<!-- ── LEVEL 2: GCP SUB-TABS ── -->
+<div class="tabbar" id="gcp-subtabbar">
+  <button class="tab-btn active" onclick="showSub('overview',this)">🏠 Overview</button>
+  <button class="tab-btn" onclick="showSub('dataflow',this)">🌊 Dataflow</button>
+  <button class="tab-btn" onclick="showSub('dataproc',this)">🔥 Dataproc</button>
+  <button class="tab-btn" onclick="showSub('composer',this)">🎼 Composer</button>
+  <button class="tab-btn" onclick="showSub('pubsub',this)">📡 Pub/Sub</button>
+  <button class="tab-btn" onclick="showSub('ingestion',this)">📥 Ingestion</button>
+  <button class="tab-btn" onclick="showSub('processing',this)">⚙️ Processing</button>
+  <button class="tab-btn" onclick="showSub('streaming',this)">🌊 Streaming</button>
+  <button class="tab-btn" onclick="showSub('storage',this)">🗄️ Storage</button>
+  <button class="tab-btn" onclick="showSub('orchestration',this)">🎯 Orchestration</button>
+  <button class="tab-btn" onclick="showSub('monitoring',this)">📊 Monitoring</button>
+  <button class="tab-btn" onclick="showSub('stack',this)">🏆 Stack</button>
+  <button class="tab-btn" onclick="showSub('gcs',this)">🧊 GCS Classes</button>
+  <button class="tab-btn" onclick="showSub('glossary',this)">📖 Glossary</button>
+</div>
+
+<!-- ── LEVEL 2: SCD & ANALYTICS SUB-TABS ── -->
+<div class="tabbar hidden" id="analytics-subtabbar">
+  <button class="tab-btn active" onclick="showAnalytics('scd',this)">📦 SCD Types</button>
+  <button class="tab-btn" onclick="showAnalytics('ranking',this)">🏅 SQL Ranking</button>
 </div>
 
 
@@ -1270,15 +1311,843 @@
 
 
 <!-- ══════════════════════════════════════════
+     TAB 15 — SQL RANKING FUNCTIONS
+══════════════════════════════════════════ -->
+<div class="standalone" id="tab-ranking">
+  <div class="phdr">
+    <h1 class="grad-blue">🏅 SQL Ranking Functions</h1>
+    <p>RANK() · DENSE_RANK() · ROW_NUMBER() — every column, every word explained</p>
+  </div>
+
+  <!-- QUICK COMPARE TABLE -->
+  <div class="twrap" style="margin-bottom:2rem;">
+    <table>
+      <thead>
+        <tr>
+          <th>Function</th>
+          <th>Ties?</th>
+          <th>Skips Numbers?</th>
+          <th>Unique?</th>
+          <th>Definition</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong style="color:var(--blue);">RANK()</strong></td>
+          <td><span class="badge b-green">Yes</span></td>
+          <td><span class="badge b-green">Yes</span></td>
+          <td><span class="badge b-red">No</span></td>
+          <td>Same rank, but gaps appear</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--orange);">DENSE_RANK()</strong></td>
+          <td><span class="badge b-green">Yes</span></td>
+          <td><span class="badge b-red">No</span></td>
+          <td><span class="badge b-red">No</span></td>
+          <td>Same rank, no gaps</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--green);">ROW_NUMBER()</strong></td>
+          <td><span class="badge b-red">No</span></td>
+          <td><span class="badge b-red">No</span></td>
+          <td><span class="badge b-green">Yes</span></td>
+          <td>Always assigns unique, sequential numbers, even for ties</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- VISUAL COMPARISON -->
+  <div class="mcards" style="margin-bottom:2rem;">
+    <div class="mcard" style="border-top:3px solid var(--blue);">
+      <div class="mcard-title" style="color:var(--blue);">RANK() — Same rank, gaps appear</div>
+      <p>When two rows tie, they get the same rank number. The next rank SKIPS the position(s) used by the tie. Like Olympic medals — if two athletes tie for Gold, the next rank is 3rd (Bronze), not 2nd.</p>
+      <div style="margin-top:0.8rem;background:#0f1117;border-radius:7px;padding:0.7rem 1rem;font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.8;">
+        Score 100 → Rank <span style="color:#93c5fd;">1</span><br/>
+        Score 100 → Rank <span style="color:#93c5fd;">1</span> (tie)<br/>
+        Score 90  → Rank <span style="color:#f87171;">3</span> (gap! 2 is skipped)<br/>
+        Score 80  → Rank <span style="color:#94a3b8;">4</span>
+      </div>
+    </div>
+    <div class="mcard" style="border-top:3px solid var(--orange);">
+      <div class="mcard-title" style="color:var(--orange);">DENSE_RANK() — Same rank, no gaps</div>
+      <p>When two rows tie, they get the same rank number. The next rank is ALWAYS the next consecutive integer — no skipping. "Dense" = tightly packed, no missing numbers.</p>
+      <div style="margin-top:0.8rem;background:#0f1117;border-radius:7px;padding:0.7rem 1rem;font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.8;">
+        Score 100 → Dense Rank <span style="color:#fcd34d;">1</span><br/>
+        Score 100 → Dense Rank <span style="color:#fcd34d;">1</span> (tie)<br/>
+        Score 90  → Dense Rank <span style="color:#fcd34d;">2</span> (no gap!)<br/>
+        Score 80  → Dense Rank <span style="color:#fcd34d;">3</span>
+      </div>
+    </div>
+    <div class="mcard" style="border-top:3px solid var(--green);">
+      <div class="mcard-title" style="color:var(--green);">ROW_NUMBER() — Always unique</div>
+      <p>Assigns a unique sequential integer to every row. When rows tie, one gets a lower number than the other — arbitrarily (or by a secondary ORDER BY). Never assigns the same number twice.</p>
+      <div style="margin-top:0.8rem;background:#0f1117;border-radius:7px;padding:0.7rem 1rem;font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.8;">
+        Score 100 → Row# <span style="color:#6ee7b7;">1</span><br/>
+        Score 100 → Row# <span style="color:#6ee7b7;">2</span> (tie → still different!)<br/>
+        Score 90  → Row# <span style="color:#6ee7b7;">3</span><br/>
+        Score 80  → Row# <span style="color:#6ee7b7;">4</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- COLUMN-BY-COLUMN EXPLANATION -->
+  <div class="dblock">
+    <h2 style="font-size:1.3rem;margin-bottom:1rem;">📖 Every Column — Word by Word</h2>
+
+    <h3 style="color:var(--blue);">Column 1: Function</h3>
+    <p>All three are <strong>window functions</strong> (also called analytic functions) in SQL. A window function performs a calculation across a set of rows that are related to the current row — without collapsing them into a single output row like GROUP BY does. Syntax: <code>FUNCTION() OVER (PARTITION BY col ORDER BY col)</code></p>
+    <ul>
+      <li><strong>OVER()</strong> — The keyword that makes it a window function. Without OVER(), RANK would not exist as a SQL function.</li>
+      <li><strong>PARTITION BY</strong> — Resets the ranking for each group. Like GROUP BY but doesn't reduce rows. Example: rank students within each class (partition = class).</li>
+      <li><strong>ORDER BY</strong> — Defines which column determines the rank order. Higher values first (DESC) = best score gets rank 1.</li>
+    </ul>
+
+    <h3 style="color:var(--blue);">Column 2: Ties?</h3>
+    <p><strong>Ties</strong> = when two or more rows have the same value in the ORDER BY column. The question is: do RANK and DENSE_RANK handle ties by giving them the same rank number?</p>
+    <ul>
+      <li><strong>RANK() — Yes</strong> — If two rows tie, both get the same rank. Example: two rows with score 100 → both get rank 1.</li>
+      <li><strong>DENSE_RANK() — Yes</strong> — Same as RANK for ties. Both tied rows get the same rank number.</li>
+      <li><strong>ROW_NUMBER() — No</strong> — Does NOT handle ties. Every row gets a unique number. If two rows tie, the tie is broken arbitrarily (or by a secondary ORDER BY column you specify). No two rows share a row number.</li>
+    </ul>
+
+    <h3 style="color:var(--blue);">Column 3: Skips Numbers?</h3>
+    <p><strong>Skips numbers</strong> = after a tie, does the next rank skip one or more integers?</p>
+    <ul>
+      <li><strong>RANK() — Yes (skips)</strong> — If 2 rows tie at rank 1, the next row gets rank 3 (not 2). The number 2 is skipped. If 3 rows tie at rank 1, the next row gets rank 4. The gap = number of tied rows.</li>
+      <li><strong>DENSE_RANK() — No (never skips)</strong> — Even after a tie, the next rank is always the next consecutive integer. 2 rows tie at rank 1 → next row is rank 2. Always consecutive, always dense.</li>
+      <li><strong>ROW_NUMBER() — No (never skips)</strong> — Numbers are always 1, 2, 3, 4... No skips, no ties. Sequential and gapless by definition.</li>
+    </ul>
+
+    <h3 style="color:var(--blue);">Column 4: Unique?</h3>
+    <p><strong>Unique</strong> = does every row get a different number, guaranteed?</p>
+    <ul>
+      <li><strong>RANK() — No</strong> — Tied rows get the same number. Not unique in the presence of ties.</li>
+      <li><strong>DENSE_RANK() — No</strong> — Tied rows get the same number. Not unique in the presence of ties.</li>
+      <li><strong>ROW_NUMBER() — Yes</strong> — Every row gets a different number, always. Guaranteed unique across all rows in the partition. This makes it ideal for de-duplication and pagination.</li>
+    </ul>
+
+    <h3 style="color:var(--blue);">Column 5: Definition</h3>
+    <ul>
+      <li><strong>"Same rank, but gaps appear"</strong> (RANK) — Ties share a rank; the gap in numbering shows how many rows shared that rank. The total count of distinct rank values may be less than the total rows.</li>
+      <li><strong>"Same rank, no gaps"</strong> (DENSE_RANK) — Ties share a rank; but the sequence of distinct rank values is always 1, 2, 3... without gaps. The highest rank value equals the number of distinct ranking values.</li>
+      <li><strong>"Always assigns unique, sequential numbers, even for ties"</strong> (ROW_NUMBER) — The word "even" is key — ties do NOT get the same number. One tied row gets N, the next gets N+1. Sequential = 1, 2, 3, 4... no repeats, no gaps.</li>
+    </ul>
+  </div>
+
+  <!-- WHEN TO USE -->
+  <div class="dblock">
+    <h3 style="color:var(--green);">When to Use Which</h3>
+    <div class="mcards">
+      <div class="mcard" style="border-top:3px solid var(--blue);">
+        <div class="mcard-title" style="color:var(--blue);">Use RANK() when…</div>
+        <p>You want to show true competitive ranking where ties result in gaps. Example: Sales leaderboard — 2 people tied for 1st, next person is 3rd. The gap tells the user "two people beat you." Sports rankings, exam results.</p>
+      </div>
+      <div class="mcard" style="border-top:3px solid var(--orange);">
+        <div class="mcard-title" style="color:var(--orange);">Use DENSE_RANK() when…</div>
+        <p>You want tied items to share a rank but prefer clean, gap-free numbering. Example: "Top 3 product categories by sales" — you always want exactly 3 distinct rank levels, even if multiple products tie at each level.</p>
+      </div>
+      <div class="mcard" style="border-top:3px solid var(--green);">
+        <div class="mcard-title" style="color:var(--green);">Use ROW_NUMBER() when…</div>
+        <p>You need exactly one row per number — for de-duplication, pagination (LIMIT per page), or picking the latest record per group. Example: "Get the most recent order per customer" — partition by customer_id, order by order_date DESC, then WHERE row_num = 1.</p>
+      </div>
+    </div>
+
+    <h3 style="color:var(--green);">Common SQL Pattern — De-duplication with ROW_NUMBER()</h3>
+    <div class="arch">
+      -- Get latest record per customer (most common interview question)
+      WITH ranked AS (
+      &nbsp;&nbsp;SELECT *,
+      &nbsp;&nbsp;&nbsp;&nbsp;ROW_NUMBER() OVER (
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PARTITION BY customer_id
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ORDER BY order_date DESC
+      &nbsp;&nbsp;&nbsp;&nbsp;) AS rn
+      &nbsp;&nbsp;FROM orders
+      )
+      SELECT * FROM ranked WHERE rn = 1;
+
+      -- Top N per group (e.g. top 3 products per category)
+      WITH ranked AS (
+      &nbsp;&nbsp;SELECT *,
+      &nbsp;&nbsp;&nbsp;&nbsp;DENSE_RANK() OVER (
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PARTITION BY category
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ORDER BY revenue DESC
+      &nbsp;&nbsp;&nbsp;&nbsp;) AS dr
+      &nbsp;&nbsp;FROM products
+      )
+      SELECT * FROM ranked WHERE dr &lt;= 3;
+    </div>
+
+    <h3 style="color:var(--green);">Side-by-side Example — Same data, three functions</h3>
+    <div class="twrap" style="margin-bottom:0;">
+      <table>
+        <thead><tr><th>Name</th><th>Score</th><th>RANK()</th><th>DENSE_RANK()</th><th>ROW_NUMBER()</th></tr></thead>
+        <tbody>
+          <tr><td>Alice</td><td>100</td><td style="color:var(--blue);">1</td><td style="color:var(--orange);">1</td><td style="color:var(--green);">1</td></tr>
+          <tr><td>Bob</td><td>100</td><td style="color:var(--blue);">1 (tie)</td><td style="color:var(--orange);">1 (tie)</td><td style="color:var(--green);">2 (unique!)</td></tr>
+          <tr><td>Carol</td><td>90</td><td style="color:var(--blue);">3 (gap!)</td><td style="color:var(--orange);">2 (no gap)</td><td style="color:var(--green);">3</td></tr>
+          <tr><td>Dave</td><td>80</td><td style="color:var(--blue);">4</td><td style="color:var(--orange);">3</td><td style="color:var(--green);">4</td></tr>
+          <tr><td>Eve</td><td>80</td><td style="color:var(--blue);">4 (tie)</td><td style="color:var(--orange);">3 (tie)</td><td style="color:var(--green);">5 (unique!)</td></tr>
+          <tr><td>Frank</td><td>70</td><td style="color:var(--blue);">6 (gap!)</td><td style="color:var(--orange);">4 (no gap)</td><td style="color:var(--green);">6</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     TAB 16 — SLOWLY CHANGING DIMENSIONS (SCD)
+══════════════════════════════════════════ -->
+<div class="standalone" id="tab-scd">
+  <div class="phdr">
+    <h1 class="grad-orange">📦 Slowly Changing Dimensions (SCD)</h1>
+    <p>How to handle changes to dimension data in a data warehouse — Types 0, 1, 2, 3, 4, 6 explained</p>
+  </div>
+
+  <!-- ── IMAGE 6 TABLE (exact source) ── -->
+  <h2 class="stitle" style="border-color:var(--orange);">📋 Quick Reference — From Your Notes</h2>
+  <div class="twrap" style="margin-bottom:2rem;">
+    <table>
+      <thead>
+        <tr>
+          <th>SCD Type</th>
+          <th>Behavior</th>
+          <th>Use Case</th>
+          <th>Data Preserved?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong style="color:var(--muted);">Type 0</strong></td>
+          <td>No change allowed</td>
+          <td>Immutable fields like DOB</td>
+          <td><span class="badge b-green">✓ Yes</span></td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--blue);">Type 1</strong></td>
+          <td>Overwrite old data</td>
+          <td>Fix typos or non-critical info</td>
+          <td><span class="badge b-red">✗ No</span></td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--green);">Type 2</strong></td>
+          <td>Add a new row (track history)</td>
+          <td>Track full historical changes</td>
+          <td><span class="badge b-green">✓ Yes</span></td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--orange);">Type 3</strong></td>
+          <td>Add new column (partial history)</td>
+          <td>Keep limited history (e.g., last address)</td>
+          <td><span class="badge b-orange">Partially</span></td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--purple);">Type 4</strong></td>
+          <td>Historical table + current table</td>
+          <td>Separate table for history</td>
+          <td><span class="badge b-green">✓ Yes (in separate table)</span></td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--red);">Type 6</strong></td>
+          <td>Hybrid of 1 + 2 + 3</td>
+          <td>Advanced use cases</td>
+          <td><span class="badge b-green">✓ Yes</span></td>
+        </tr>
+        <tr>
+          <td><strong style="color:#22d3ee;">Type 5</strong></td>
+          <td>Mini-dimension + Type 1 outrigger</td>
+          <td>Fast-changing attributes separated into a small lookup dimension</td>
+          <td><span class="badge b-green">✓ Yes (in mini-dimension)</span></td>
+        </tr>
+        <tr>
+          <td><strong style="color:#a3e635;">Type 7</strong></td>
+          <td>Dual Type 1 + Type 2 (surrogate + natural key in fact)</td>
+          <td>Analysts need both historical AND current-state views of the same fact</td>
+          <td><span class="badge b-green">✓ Yes (both views)</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── IMAGE 7 TABLE — WHEN TO USE WHICH TYPE ── -->
+  <h2 class="stitle" style="border-color:var(--green);">🎯 When to Use Which SCD Type — Decision Guide</h2>
+  <div class="twrap" style="margin-bottom:1rem;">
+    <table>
+      <thead>
+        <tr>
+          <th>Situation</th>
+          <th>Use This Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Typos or non-critical corrections</td>
+          <td><strong style="color:var(--blue);">Type 1</strong></td>
+        </tr>
+        <tr>
+          <td>Need <strong>full</strong> audit/history of changes</td>
+          <td><strong style="color:var(--green);">Type 2</strong></td>
+        </tr>
+        <tr>
+          <td>Only care about current and previous values</td>
+          <td><strong style="color:var(--orange);">Type 3</strong></td>
+        </tr>
+        <tr>
+          <td>Separate historical and active storage</td>
+          <td><strong style="color:var(--purple);">Type 4</strong></td>
+        </tr>
+        <tr>
+          <td>Some attributes change fast — isolate them into a small separate dimension</td>
+          <td><strong style="color:#22d3ee;">Type 5</strong></td>
+        </tr>
+        <tr>
+          <td>Need both "value at time of transaction" AND "current value today" from one fact table</td>
+          <td><strong style="color:#a3e635;">Type 7</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- EXPLANATION OF EVERY WORD IN IMAGE 7 -->
+  <div class="dblock" style="margin-bottom:1.5rem;">
+    <h2 style="font-size:1.2rem;margin-bottom:0.8rem;">📖 Every Word in the Decision Table — Explained</h2>
+
+    <h3 style="color:var(--blue);">Situation 1: "Typos or non-critical corrections" → Type 1 (Overwrite)</h3>
+    <ul>
+      <li><strong>Typos</strong> — A data entry mistake. Example: customer name saved as "Jhon" instead of "John". The wrong value was never valid — it was always meant to be "John". There is no business value in keeping "Jhon" in history.</li>
+      <li><strong>Non-critical corrections</strong> — Changes to attributes that the business does not need to track over time. "Non-critical" = the old value has zero analytical importance. Example: a product's internal code was updated for consistency, an employee's middle name was added, a phone number format was standardised.</li>
+      <li><strong>Why Type 1 fits</strong> — Since the old value was either wrong or irrelevant, overwriting it causes no loss of meaningful information. Using Type 2 here would create unnecessary extra rows for data that was never business-valid.</li>
+      <li><strong>Key signal</strong> — Ask: "Would an analyst ever want to report on the old value?" If No → Type 1.</li>
+    </ul>
+
+    <h3 style="color:var(--green);">Situation 2: "Need full audit/history of changes" → Type 2 (Add New Row)</h3>
+    <ul>
+      <li><strong>Full audit</strong> — An audit is a formal review of historical records to verify accuracy, detect fraud, or meet compliance requirements. "Full" = every single change must be traceable, not just the most recent one.</li>
+      <li><strong>History of changes</strong> — A complete chronological record of every value a dimension attribute has ever held. Example: an employee moved through departments — Engineering (2018), Marketing (2020), Sales (2022). All three states must be queryable.</li>
+      <li><strong>Why Type 2 fits</strong> — Each change creates a new row with its own surrogate key, effective_start_date, effective_end_date, and is_current flag. The fact table stores surrogate keys — so joining gives the EXACT value at the time of each transaction. Perfect historical accuracy for any point in time.</li>
+      <li><strong>Key signal</strong> — Ask: "Do I need to know what this value was at the exact time of a past transaction?" If Yes → Type 2.</li>
+    </ul>
+
+    <h3 style="color:var(--orange);">Situation 3: "Only care about current and previous values" → Type 3 (Add New Column)</h3>
+    <ul>
+      <li><strong>Only care about</strong> — This phrase is the key qualifier. It means you have deliberately scoped your business requirement to just two states — now and immediately before. You are NOT trying to answer "what was it in 2019?" — only "what was it last time, and what is it now?"</li>
+      <li><strong>Current values</strong> — What the attribute is today. The active, live value used for current reporting. Stored in the <code>current_value</code> column.</li>
+      <li><strong>Previous values</strong> — What the attribute was immediately before the most recent change. Stored in the <code>previous_value</code> column. Only one step back — the version before that is gone once another change happens.</li>
+      <li><strong>Why Type 3 fits</strong> — Adds extra columns without adding rows. Simple to implement, easy to query. No surrogate keys, no date ranges. Just: WHERE did this customer used to be, and WHERE are they now?</li>
+      <li><strong>Key signal</strong> — Ask: "Do I only need to compare today vs. the last change, with no need to go further back?" If Yes → Type 3. Example: reporting customers who moved sales region last quarter.</li>
+    </ul>
+
+    <h3 style="color:var(--purple);">Situation 4: "Separate historical and active storage" → Type 4 (History Table)</h3>
+    <ul>
+      <li><strong>Separate</strong> — Two physically different database tables are used. The word "separate" is the defining characteristic of Type 4. History is not mixed into the main dimension table.</li>
+      <li><strong>Historical storage</strong> — A dedicated table (e.g., <code>dim_customer_history</code>) that stores every past version of the dimension record with timestamps. Can grow very large over time. Queried less frequently — usually for audits, compliance, or analytical deep-dives.</li>
+      <li><strong>Active storage</strong> — The main dimension table (e.g., <code>dim_customer</code>) that stores only ONE row per entity — the current, live values. Always small and fast. Queried constantly by operational dashboards and ETL joins.</li>
+      <li><strong>Why Type 4 fits</strong> — Keeps the main dimension table small and performant for high-frequency lookups. If you stored all history in the main table (Type 2), every query would need a <code>WHERE is_current = True</code> filter and performance degrades as history grows. Type 4 avoids this by physically separating the two concerns.</li>
+      <li><strong>Key signal</strong> — Ask: "Is the main dimension table used for high-performance current lookups AND do I also need a full audit trail separately?" If Yes → Type 4.</li>
+    </ul>
+
+    <h3 style="color:#22d3ee;">Situation 5: "Some attributes change fast — isolate them" → Type 5 (Mini-Dimension + Outrigger)</h3>
+    <ul>
+      <li><strong>Mini-dimension</strong> — A small separate dimension table that contains a subset of attributes that change frequently. Instead of cluttering the main dimension with rapidly-changing columns, you extract those columns into their own tiny "mini" dimension. Example: a Customer dimension might have stable attributes (name, DOB) but fast-changing attributes (income band, credit score tier, loyalty tier). The fast-changing ones go into a <code>dim_customer_profile</code> mini-dimension.</li>
+      <li><strong>Outrigger</strong> — A foreign key column added to the MAIN dimension table (Type 1 — always overwritten to current) that points to the CURRENT row in the mini-dimension. It is called an "outrigger" because it hangs off the side of the main dimension like an outrigger on a boat.</li>
+      <li><strong>How it works</strong> — The fact table stores TWO foreign keys: (1) the main dimension surrogate key (for historical joins to stable attributes) and (2) the mini-dimension key (for joins to fast-changing attributes at the time of the transaction). The main dimension's outrigger column always shows the current mini-dimension key (Type 1 overwrite).</li>
+      <li><strong>Why it exists</strong> — Without Type 5, adding a fast-changing attribute to a Type 2 dimension would create a new row every time that attribute changes — even if the core attributes (name, address) haven't changed. This bloats the dimension with millions of rows. Type 5 isolates fast-changing attributes so they don't trigger unnecessary Type 2 row creation in the main dimension.</li>
+      <li><strong>Key signal</strong> — Ask: "Does this dimension have a mix of slow-changing and fast-changing attributes, and are the fast-changing ones causing row explosion in my Type 2 dimension?" If Yes → Type 5.</li>
+    </ul>
+
+    <h3 style="color:#a3e635;">Situation 6: "Need both historical AND current-state view" → Type 7 (Dual Type 1 + Type 2)</h3>
+    <ul>
+      <li><strong>Dual</strong> — Two mechanisms run simultaneously on the same dimension. Type 7 is unique because it stores BOTH a surrogate key (for historical accuracy) AND a natural/durable key (for current-state lookup) in the fact table itself.</li>
+      <li><strong>Surrogate key (Type 2 component)</strong> — The artificial key (e.g., customer_sk = 1001 for "Alice when she was in Mumbai"). The fact table stores this surrogate key at transaction time. Joining via surrogate key gives you the HISTORICAL value — what the attribute was when the transaction happened.</li>
+      <li><strong>Natural / Durable key (Type 1 component)</strong> — The original business identifier (e.g., customer_id = 101 for "Alice" regardless of which city she lives in). The fact table also stores this natural key. Joining via the natural key to a "current dimension view" (a SQL view filtered to <code>WHERE is_current = True</code>) gives you the CURRENT value — what the attribute is today, applied to all historical transactions.</li>
+      <li><strong>Two views from one fact table</strong> — An analyst can write two different queries on the same fact table:
+        <ul>
+          <li>Join via <code>customer_sk</code> → "What city was Alice in when she placed this order?" (historical)</li>
+          <li>Join via <code>customer_id</code> to current view → "What city is Alice in now, and how many orders has she ever placed?" (current state applied to all history)</li>
+        </ul>
+      </li>
+      <li><strong>Why it's powerful</strong> — No other SCD type lets you answer both questions from the same fact table without reformulating the query. Type 2 alone can only give historical. Type 1 alone can only give current. Type 7 gives BOTH simultaneously.</li>
+      <li><strong>Key signal</strong> — Ask: "Do my analysts need to report on both what-the-value-was-at-the-time AND what-the-value-is-today, using the same fact table?" If Yes → Type 7. This is common in sales reporting (historical territory vs. current territory) and finance (historical cost centre vs. current cost centre).</li>
+    </ul>
+  </div>
+
+  <!-- COLUMN-BY-COLUMN BREAKDOWN OF IMAGE 6 -->
+  <div class="dblock" style="margin-bottom:1.5rem;">
+    <h2 style="font-size:1.2rem;margin-bottom:0.8rem;">📖 Every Column from the Table — Word by Word</h2>
+
+    <h3 style="color:var(--orange);">Column 1: SCD Type</h3>
+    <p><strong>SCD</strong> = Slowly Changing Dimension. A <strong>type</strong> is a numbered strategy (0–6) that describes HOW you handle a change to a dimension value. Each type is a different design choice with different tradeoffs between simplicity, storage, and historical accuracy. The type you choose determines your entire data model for that dimension table.</p>
+    <ul>
+      <li><strong>Why no Type 5?</strong> — Type 5 exists in theory (mini-dimension + Type 1 outrigger) but is rarely discussed or used in practice. The common types are 0, 1, 2, 3, 4, and 6.</li>
+      <li><strong>Why Type 6 = 1+2+3?</strong> — Literally 1+2+3=6. It combines all three strategies into one powerful hybrid approach.</li>
+    </ul>
+
+    <h3 style="color:var(--orange);">Column 2: Behavior</h3>
+    <p><strong>Behavior</strong> = what physically happens to the database when a dimension value changes in the source system. This is the action your ETL pipeline takes:</p>
+    <ul>
+      <li><strong>"No change allowed"</strong> (Type 0) — The ETL pipeline detects a change but intentionally does nothing. The original value is frozen in the warehouse forever. The source change is discarded.</li>
+      <li><strong>"Overwrite old data"</strong> (Type 1) — The ETL pipeline runs an SQL <code>UPDATE</code> on the existing row. The old value is replaced in-place. After the update, the old value no longer exists anywhere in the warehouse.</li>
+      <li><strong>"Add a new row (track history)"</strong> (Type 2) — The ETL pipeline runs an SQL <code>UPDATE</code> on the old row (set end_date and is_current=False) AND an SQL <code>INSERT</code> for the new row (new surrogate key, new value, start_date=today, is_current=True). Both rows coexist forever.</li>
+      <li><strong>"Add new column (partial history)"</strong> (Type 3) — The ETL pipeline runs an SQL <code>UPDATE</code> that moves the current value into the <code>previous_value</code> column and writes the new value into the <code>current_value</code> column. Only two versions visible at any time.</li>
+      <li><strong>"Historical table + current table"</strong> (Type 4) — The ETL pipeline runs an <code>UPDATE</code> on the main dimension table (always stores current only) AND an <code>INSERT</code> into a separate history table (stores all versions with timestamps).</li>
+      <li><strong>"Hybrid of 1 + 2 + 3"</strong> (Type 6) — The ETL pipeline inserts a new row (Type 2 behavior) AND overwrites the <code>current_value</code> column on ALL rows for that entity (Type 1 behavior) AND maintains a <code>historical_value</code> column on each row (Type 3 behavior). Most complex ETL logic of all types.</li>
+    </ul>
+
+    <h3 style="color:var(--orange);">Column 3: Use Case</h3>
+    <p><strong>Use case</strong> = the real-world business scenario where this SCD type is the right choice.</p>
+    <ul>
+      <li><strong>"Immutable fields like DOB"</strong> (Type 0) — <strong>DOB</strong> = Date of Birth. Some attributes should logically never change. If a source system "corrects" a date of birth, you might deliberately ignore that change and keep the original. Other examples: original account open date, first transaction date, country of origin at registration. These are "point-in-time" facts, not attributes that evolve.</li>
+      <li><strong>"Fix typos or non-critical info"</strong> (Type 1) — When a value was entered incorrectly (e.g., customer name "Jon" should be "John") and historical accuracy about that typo has zero business value. Also for attributes that are simply not important to track historically — like a customer's email address (analysts only care about the current one, not every old email).</li>
+      <li><strong>"Track full historical changes"</strong> (Type 2) — When the business genuinely needs to know "what was the value at the time of this transaction?" Example: a customer changed their loyalty tier from Silver to Gold. All orders placed while Silver should be analysed under Silver. Orders after Gold promotion should be under Gold. Full audit trail required.</li>
+      <li><strong>"Keep limited history (e.g., last address)"</strong> (Type 3) — When the business only needs "current vs. previous" for comparison. Example: "Show me customers who changed region in the last reorganisation" — you just need current_region and previous_region. No need to go back further than one change.</li>
+      <li><strong>"Separate table for history"</strong> (Type 4) — When the main dimension table is used heavily for current-state lookups (must be small and fast) but a separate audit/history requirement exists. The main table stays lean; the history table satisfies compliance or audit queries. Example: employee current department (fast lookup) + all past departments (compliance audit).</li>
+      <li><strong>"Advanced use cases"</strong> (Type 6) — Complex enterprise reporting that needs: (a) historical accuracy in fact table joins, (b) easy "what is it today?" lookups without filtering, and (c) ability to compare current vs. historical in the same query. Used when you have both operational reporting (current state) and analytical reporting (historical accuracy) on the same dimension.</li>
+    </ul>
+
+    <h3 style="color:var(--orange);">Column 4: Data Preserved?</h3>
+    <p><strong>Data Preserved</strong> = does the warehouse retain a record of what the value was BEFORE the change? Can you query the old value after the update?</p>
+    <ul>
+      <li><strong>✓ Yes (Type 0)</strong> — The original value is preserved forever — because nothing ever changes. The "preservation" here is by inaction. If the source changes, the warehouse doesn't follow → original value is permanently preserved.</li>
+      <li><strong>✗ No (Type 1)</strong> — The old value is completely overwritten and unrecoverable. After an UPDATE, the old value is gone from the warehouse. No row in any table stores it. This is the only type where data is permanently destroyed.</li>
+      <li><strong>✓ Yes (Type 2)</strong> — The old row still exists with the old value, its surrogate key, and the date range it was active. Full history is preserved. You can query any point in time and see the exact value at that moment.</li>
+      <li><strong>Partially (Type 3)</strong> — Only the immediately previous value is preserved (in the previous_value column). If the value changes twice, the first version is lost. So partial = limited history (one step back only).</li>
+      <li><strong>✓ Yes — in separate table (Type 4)</strong> — The current dimension table does NOT preserve history (it only has the current row). But the history table preserves all old values. So history IS preserved — just in a different table, not the main dimension table.</li>
+      <li><strong>✓ Yes (Type 6)</strong> — Full history is preserved via new rows (Type 2 component). Every version of a dimension value has its own row with start/end dates. The historical_value column on each row also shows what that row's value was at the time.</li>
+    </ul>
+  </div>
+
+  <!-- WHAT IS SCD -->
+  <div class="dblock" style="margin-bottom:1.5rem;">
+    <h2 style="font-size:1.3rem;margin-bottom:0.5rem;">What is a Slowly Changing Dimension?</h2>
+    <p>In a data warehouse, a <strong>dimension</strong> is a descriptive table (Customer, Product, Employee, Location). Over time, the values in these tables <em>change slowly</em> — a customer moves cities, a product gets re-categorised, an employee changes department. The question is: <strong>how do you handle that change?</strong> Do you overwrite the old value, keep history, or add a new column? The answer determines your SCD type.</p>
+    <div class="hbox" style="border-color:var(--orange);">
+      <strong>Key principle:</strong> In a fact table (orders, transactions, events), you want to know what the dimension value WAS at the time of the event — not what it is today. Example: a customer placed an order when they lived in Mumbai. They later moved to Delhi. The order record should still show Mumbai. SCD types determine whether this historical accuracy is preserved.
+    </div>
+  </div>
+
+  <!-- SCD TYPES QUICK TABLE -->
+  <h2 class="stitle" style="border-color:var(--orange);">All SCD Types — Quick Reference</h2>
+  <div class="twrap" style="margin-bottom:2rem;">
+    <table>
+      <thead><tr><th>Type</th><th>Name</th><th>Strategy</th><th>Keeps History?</th><th>Complexity</th><th>When to Use</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong style="color:var(--muted);">Type 0</strong></td>
+          <td>Retain Original</td>
+          <td>Never change — ignore all updates</td>
+          <td><span class="badge b-red">No history (frozen)</span></td>
+          <td><span class="badge b-green">Lowest</span></td>
+          <td>Values that should never change (e.g., date of birth, original source code)</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--blue);">Type 1</strong></td>
+          <td>Overwrite</td>
+          <td>Overwrite old value with new value</td>
+          <td><span class="badge b-red">No history lost</span></td>
+          <td><span class="badge b-green">Low</span></td>
+          <td>Corrections, typos, or when history doesn't matter</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--green);">Type 2</strong></td>
+          <td>Add New Row</td>
+          <td>Insert a new row with new value; expire old row</td>
+          <td><span class="badge b-green">Full history ✓</span></td>
+          <td><span class="badge b-orange">Medium</span></td>
+          <td>Most common. When full historical accuracy is required</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--orange);">Type 3</strong></td>
+          <td>Add New Column</td>
+          <td>Add a "previous_value" column alongside current</td>
+          <td><span class="badge b-orange">Partial (1 version back)</span></td>
+          <td><span class="badge b-orange">Medium</span></td>
+          <td>When you only need to track the immediately previous value</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--purple);">Type 4</strong></td>
+          <td>History Table</td>
+          <td>Keep current in main table; all history in separate table</td>
+          <td><span class="badge b-green">Full history ✓</span></td>
+          <td><span class="badge b-orange">Medium-High</span></td>
+          <td>When main table must stay small; history queried separately</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--red);">Type 6</strong></td>
+          <td>Hybrid (1+2+3)</td>
+          <td>New row + current_flag + current/previous columns</td>
+          <td><span class="badge b-green">Full history ✓</span></td>
+          <td><span class="badge b-red">High</span></td>
+          <td>When you need full history AND easy access to current value in every row</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TYPE 0 -->
+  <div class="dblock" style="border-color:#2a2d3e;">
+    <h2 style="font-size:1.2rem;margin-bottom:0.3rem;">Type 0 — Retain Original (Freeze)</h2>
+    <p class="tline">Strategy: Ignore all changes. The original value is kept forever, no matter what happens in the source system.</p>
+    <h3 style="color:var(--muted);">How it works</h3>
+    <p>When a change is detected in the source, it is <strong>discarded</strong>. The dimension row is never updated.</p>
+    <ul>
+      <li><strong>Retain Original</strong> — "Retain" = keep. "Original" = the first value that was loaded. No future writes happen to this row.</li>
+      <li>Useful for attributes that are inherently immutable or where the warehouse intentionally captures the value at first load.</li>
+    </ul>
+    <h3 style="color:var(--muted);">Example</h3>
+    <div class="arch">
+      Customer loaded in 2020: original_city = "Mumbai"
+      Customer moves to Delhi in 2023 → Source updates to Delhi
+      Type 0: Warehouse IGNORES the update → still stores "Mumbai"
+      Use case: "City where customer first registered" — intentionally frozen.
+    </div>
+    <h3 style="color:var(--muted);">When to use</h3>
+    <p>Date of birth, original registration country, signup date, immutable identifiers. When you deliberately want the "as of first seen" value and NOT current reality.</p>
+  </div>
+
+  <!-- TYPE 1 -->
+  <div class="dblock" style="border-color:#4f9cf922;">
+    <h2 style="font-size:1.2rem;margin-bottom:0.3rem;color:var(--blue);">Type 1 — Overwrite (No History)</h2>
+    <p class="tline">Strategy: When a value changes, simply overwrite the old value with the new one. History is permanently lost.</p>
+    <h3 style="color:var(--blue);">How it works</h3>
+    <p>The existing row in the dimension table is <strong>UPDATEd</strong> in-place. The old value is gone. No new rows are created.</p>
+    <ul>
+      <li><strong>Overwrite</strong> — The old value is replaced. Like editing a cell in a spreadsheet — the previous content disappears.</li>
+      <li>Simplest SCD type to implement. No extra columns, no extra rows, no date tracking.</li>
+      <li>All historical fact records that join to this dimension will now see the NEW value, even for old transactions.</li>
+    </ul>
+    <h3 style="color:var(--blue);">Example — Before and After</h3>
+    <div class="twrap" style="margin-bottom:0.8rem;">
+      <table>
+        <thead><tr><th>customer_id</th><th>name</th><th>city</th></tr></thead>
+        <tbody>
+          <tr><td>101</td><td>Alice</td><td style="color:var(--red);">Mumbai <small>(old)</small></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:0.85rem;color:var(--muted);margin:0.3rem 0 0.6rem;">After Type 1 update (Alice moves to Delhi):</p>
+    <div class="twrap" style="margin-bottom:0.8rem;">
+      <table>
+        <thead><tr><th>customer_id</th><th>name</th><th>city</th></tr></thead>
+        <tbody>
+          <tr><td>101</td><td>Alice</td><td style="color:var(--green);">Delhi <small>(new, old value gone)</small></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="hbox" style="border-color:var(--red);">
+      <strong>Problem:</strong> Any fact table row (order placed when Alice was in Mumbai) now joins to Delhi. The historical accuracy is permanently destroyed. All old orders now look like they came from Delhi.
+    </div>
+    <h3 style="color:var(--blue);">When to use</h3>
+    <p>Fixing data quality errors (typos, wrong codes), or attributes where historical accuracy simply doesn't matter to your business. Example: correcting a misspelled product name, or updating a phone number.</p>
+  </div>
+
+  <!-- TYPE 2 -->
+  <div class="dblock" style="border-color:#3ecf8e22;">
+    <h2 style="font-size:1.2rem;margin-bottom:0.3rem;color:var(--green);">Type 2 — Add New Row (Full History) ⭐ Most Common</h2>
+    <p class="tline">Strategy: When a value changes, INSERT a new row for the new value and mark the old row as expired. Both rows coexist — full history preserved.</p>
+    <h3 style="color:var(--green);">How it works</h3>
+    <ul>
+      <li>A <strong>surrogate key</strong> (artificial unique key, e.g., customer_sk) is added to the dimension table — separate from the natural/business key (customer_id).</li>
+      <li>When a change occurs: the old row gets an <strong>expiry date</strong> (effective_end_date) and a flag (is_current = False). A NEW row is inserted with the new value, a new surrogate key, and effective_start_date = today.</li>
+      <li>The fact table stores the <strong>surrogate key</strong> at the time of the transaction — so joining gives the value as it was at that time.</li>
+    </ul>
+    <h3 style="color:var(--green);">Key columns added</h3>
+    <ul>
+      <li><strong>surrogate_key</strong> (sk) — Unique artificial key. Each version of a customer gets its own sk.</li>
+      <li><strong>natural_key</strong> (customer_id) — The original business identifier. Same across all versions of the same customer.</li>
+      <li><strong>effective_start_date</strong> — The date this row's values became effective.</li>
+      <li><strong>effective_end_date</strong> — The date this row's values stopped being current. NULL or 9999-12-31 means "still current."</li>
+      <li><strong>is_current</strong> (flag) — Boolean. True = this is the active record. False = expired version.</li>
+    </ul>
+    <h3 style="color:var(--green);">Example — Alice moves from Mumbai to Delhi</h3>
+    <div class="twrap" style="margin-bottom:0;">
+      <table>
+        <thead><tr><th>customer_sk</th><th>customer_id</th><th>name</th><th>city</th><th>start_date</th><th>end_date</th><th>is_current</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>1001</td><td>101</td><td>Alice</td>
+            <td style="color:var(--red);">Mumbai</td>
+            <td>2020-01-01</td>
+            <td style="color:var(--red);">2023-06-30</td>
+            <td><span class="badge b-red">False (expired)</span></td>
+          </tr>
+          <tr>
+            <td style="color:var(--green);">1002</td><td>101</td><td>Alice</td>
+            <td style="color:var(--green);">Delhi</td>
+            <td style="color:var(--green);">2023-07-01</td>
+            <td style="color:var(--green);">9999-12-31</td>
+            <td><span class="badge b-green">True (current)</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="hbox" style="border-color:var(--green);margin-top:0.8rem;">
+      <strong>Result:</strong> An order placed in 2021 (fact row storing customer_sk = 1001) → joins to Mumbai ✓. An order placed in 2024 (fact row storing customer_sk = 1002) → joins to Delhi ✓. Full historical accuracy preserved.
+    </div>
+    <h3 style="color:var(--green);">When to use</h3>
+    <p>The DEFAULT choice for most slowly changing dimensions. Use when historical accuracy matters for reporting. Customer demographics, employee department, product category — any attribute that changes and where you need to know "what was it at the time?"</p>
+  </div>
+
+  <!-- TYPE 3 -->
+  <div class="dblock" style="border-color:#f59e0b22;">
+    <h2 style="font-size:1.2rem;margin-bottom:0.3rem;color:var(--orange);">Type 3 — Add New Column (Partial History)</h2>
+    <p class="tline">Strategy: Add a "previous_value" column alongside the current value column. Only tracks one version back.</p>
+    <h3 style="color:var(--orange);">How it works</h3>
+    <ul>
+      <li>When a change occurs, the current value is moved into a <strong>previous_value column</strong>, and the new value is written into the <strong>current_value column</strong>. No new rows. No new tables. Just extra columns.</li>
+      <li>You can only see the last two states: what it is NOW and what it was BEFORE the most recent change. If the value changes again, the "before" version is permanently lost.</li>
+    </ul>
+    <h3 style="color:var(--orange);">Example — Alice moves from Mumbai to Delhi</h3>
+    <div class="twrap" style="margin-bottom:0;">
+      <table>
+        <thead><tr><th>customer_id</th><th>name</th><th>previous_city</th><th>current_city</th></tr></thead>
+        <tbody>
+          <tr><td>101</td><td>Alice</td><td style="color:var(--muted);">Mumbai</td><td style="color:var(--green);">Delhi</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="hbox" style="border-color:var(--orange);margin-top:0.8rem;">
+      <strong>Limitation:</strong> If Alice later moves from Delhi to Bangalore, the row becomes: previous_city = Delhi, current_city = Bangalore. Mumbai is now permanently lost. Type 3 only gives you one step of history.
+    </div>
+    <h3 style="color:var(--orange);">When to use</h3>
+    <p>When you only need to compare current state vs. the immediately previous state. Example: reporting that shows "this quarter vs. last quarter region," or tracking an employee's current department vs. their previous one — with no need for the full history.</p>
+  </div>
+
+  <!-- TYPE 4 -->
+  <div class="dblock" style="border-color:#a78bfa22;">
+    <h2 style="font-size:1.2rem;margin-bottom:0.3rem;color:var(--purple);">Type 4 — History Table (Mini-Dimension)</h2>
+    <p class="tline">Strategy: Keep current values in the main dimension table. Store ALL historical changes in a separate history table.</p>
+    <h3 style="color:var(--purple);">How it works</h3>
+    <ul>
+      <li>The <strong>main dimension table</strong> (dim_customer) always has just one row per customer — containing current values only. Fast and simple to query for current state.</li>
+      <li>A separate <strong>history table</strong> (dim_customer_history) stores all changes with timestamps. Every time a value changes, a new row is inserted into the history table.</li>
+      <li>The fact table can join to either: the main table (for current reporting) or the history table (for historical analysis).</li>
+    </ul>
+    <h3 style="color:var(--purple);">Example</h3>
+    <div class="arch">
+      dim_customer (current only):
+      101 | Alice | Delhi | 2024-01-01
+
+      dim_customer_history (all versions):
+      101 | Alice | Mumbai | 2020-01-01 | 2023-06-30
+      101 | Alice | Delhi  | 2023-07-01 | NULL (current)
+    </div>
+    <h3 style="color:var(--purple);">When to use</h3>
+    <p>When the main dimension table needs to stay lean for performance (fast lookups of current state), but you still want full history available for audit or analysis. Common in OLTP→OLAP migrations where the operational system only stores current state.</p>
+  </div>
+
+  <!-- TYPE 6 -->
+  <div class="dblock" style="border-color:#f8717122;">
+    <h2 style="font-size:1.2rem;margin-bottom:0.3rem;color:var(--red);">Type 6 — Hybrid (Type 1 + 2 + 3 combined)</h2>
+    <p class="tline">Strategy: Combines all three approaches — new rows like Type 2, current/previous columns like Type 3, and overwrites current_value across all rows like Type 1.</p>
+    <div class="hbox" style="border-color:var(--red);">
+      <strong>Why "Type 6"?</strong> 1 + 2 + 3 = 6. It is literally the sum of Types 1, 2, and 3 combined into one approach.
+    </div>
+    <h3 style="color:var(--red);">How it works</h3>
+    <ul>
+      <li>Like Type 2: a new row is inserted when a value changes, with effective_start_date, effective_end_date, is_current columns.</li>
+      <li>Like Type 3: each row has a <code>current_value</code> column AND an <code>original_value</code> column (or previous_value).</li>
+      <li>Like Type 1: the <code>current_value</code> column is OVERWRITTEN on ALL rows for that customer — even old expired rows — to always reflect what the current value is today.</li>
+    </ul>
+    <h3 style="color:var(--red);">Example — Alice: Mumbai → Delhi → Bangalore</h3>
+    <div class="twrap" style="margin-bottom:0;">
+      <table>
+        <thead><tr><th>sk</th><th>id</th><th>name</th><th>historical_city</th><th>current_city</th><th>start</th><th>end</th><th>is_current</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>1001</td><td>101</td><td>Alice</td>
+            <td style="color:var(--muted);">Mumbai</td>
+            <td style="color:var(--green);">Bangalore</td>
+            <td>2020-01-01</td><td>2023-06-30</td>
+            <td><span class="badge b-red">False</span></td>
+          </tr>
+          <tr>
+            <td>1002</td><td>101</td><td>Alice</td>
+            <td style="color:var(--orange);">Delhi</td>
+            <td style="color:var(--green);">Bangalore</td>
+            <td>2023-07-01</td><td>2024-03-31</td>
+            <td><span class="badge b-red">False</span></td>
+          </tr>
+          <tr>
+            <td>1003</td><td>101</td><td>Alice</td>
+            <td style="color:var(--green);">Bangalore</td>
+            <td style="color:var(--green);">Bangalore</td>
+            <td>2024-04-01</td><td>9999-12-31</td>
+            <td><span class="badge b-green">True</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:0.85rem;color:#94a3b8;margin-top:0.6rem;">Notice: <strong>current_city = Bangalore</strong> on ALL rows — even the expired Mumbai and Delhi rows. This lets reports always show "where is Alice now?" without filtering to is_current=True first. But <strong>historical_city</strong> preserves what city was used at the time of each version.</p>
+    <h3 style="color:var(--red);">When to use</h3>
+    <p>When you need the richest possible dimension — full history AND the ability to easily report "current state across all history." Common in enterprise data warehouses where analysts need both "what was it then?" and "what is it now?" in the same query without complex joins.</p>
+  </div>
+
+  <!-- TYPE 5 -->
+  <div class="dblock" style="border-color:#22d3ee22;">
+    <h2 style="font-size:1.2rem;margin-bottom:0.3rem;color:#22d3ee;">Type 5 — Mini-Dimension + Type 1 Outrigger</h2>
+    <p class="tline">Strategy: Extract fast-changing attributes into a separate mini-dimension table. The main dimension holds a Type 1 (always-current) foreign key pointing to it.</p>
+
+    <h3 style="color:#22d3ee;">The Problem Type 5 Solves</h3>
+    <p>In a Type 2 dimension, every change to ANY attribute creates a new row. If a Customer dimension tracks both name/address (change rarely) and income band/credit tier (change frequently), the frequent changes explode the dimension with millions of rows — even though nothing important changed about the customer.</p>
+    <div class="hbox" style="border-color:#22d3ee;">
+      <strong>Solution:</strong> Separate fast-changing attributes into a small <strong>mini-dimension</strong> (dim_customer_profile). The main dim_customer only gets a new row when stable attributes change. The mini-dimension gets a new row when fast attributes change.
+    </div>
+
+    <h3 style="color:#22d3ee;">Key Components</h3>
+    <ul>
+      <li><strong>Main dimension (dim_customer)</strong> — Contains stable, slow-changing attributes: name, DOB, gender, address. Uses Type 2 (new rows when these change). Has a <code>current_profile_key</code> outrigger column (Type 1 — always overwritten to current mini-dim key).</li>
+      <li><strong>Mini-dimension (dim_customer_profile)</strong> — Contains fast-changing attributes: income band, credit score tier, loyalty status, age group. Each unique combination of these values gets one row. New row added when combination changes.</li>
+      <li><strong>Fact table</strong> — Stores BOTH <code>customer_sk</code> (from main dim) AND <code>profile_key</code> (from mini-dim) at transaction time. This preserves both stable and fast-changing attribute history independently.</li>
+      <li><strong>Outrigger</strong> — The <code>current_profile_key</code> column in the main dimension is the outrigger. It is always Type 1 (overwritten) to point to the customer's current profile. Used for current-state reporting without joining the fact table.</li>
+    </ul>
+
+    <h3 style="color:#22d3ee;">Example</h3>
+    <div class="arch">
+dim_customer (main):
+customer_sk | customer_id | name  | city   | current_profile_key
+1001        | 101         | Alice | Mumbai | 55  ← always current (Type 1)
+
+dim_customer_profile (mini):
+profile_key | income_band | credit_tier | loyalty_status
+50          | Low         | Bronze      | Basic
+55          | Medium      | Silver      | Premium  ← Alice's current profile
+
+fact_orders:
+order_id | customer_sk | profile_key | amount
+9001     | 1001        | 50          | 500   ← Alice was Low/Bronze when ordered
+9002     | 1001        | 55          | 1200  ← Alice was Medium/Silver when ordered</div>
+
+    <h3 style="color:#22d3ee;">Data Preserved?</h3>
+    <p>Yes — in the mini-dimension. Each profile combination has its own key stored in the fact table, so you can always see what profile state existed at transaction time.</p>
+    <h3 style="color:#22d3ee;">When to Use</h3>
+    <p>When a dimension has a mix of slow-changing (stable) and fast-changing attributes, and the fast-changing ones are causing Type 2 row explosion. Common for customer demographics, credit scoring, or any profile-based segmentation that updates frequently.</p>
+  </div>
+
+  <!-- TYPE 7 -->
+  <div class="dblock" style="border-color:#a3e63522;">
+    <h2 style="font-size:1.2rem;margin-bottom:0.3rem;color:#a3e635;">Type 7 — Dual Type 1 + Type 2 (Surrogate + Natural Key in Fact)</h2>
+    <p class="tline">Strategy: Store BOTH a surrogate key (Type 2, for historical joins) AND a natural/durable key (Type 1, for current-state joins) in the fact table. Enables two different analytical views of the same data.</p>
+
+    <h3 style="color:#a3e635;">The Core Idea</h3>
+    <p>All other SCD types force you to choose: historical accuracy OR current-state simplicity. Type 7 refuses to choose — it gives both simultaneously by storing two keys in the fact table and providing two SQL views on the same dimension table.</p>
+
+    <h3 style="color:#a3e635;">Key Components</h3>
+    <ul>
+      <li><strong>Dimension table</strong> — Uses Type 2 structure: surrogate key, natural key, attribute values, effective_start_date, effective_end_date, is_current flag. Same as a standard Type 2 dimension.</li>
+      <li><strong>Current dimension view</strong> — A SQL view defined as: <code>SELECT * FROM dim_customer WHERE is_current = TRUE</code>. This view always shows only the latest row per customer. Used for current-state joins.</li>
+      <li><strong>Fact table</strong> — Stores TWO foreign keys:
+        <ul>
+          <li><code>customer_sk</code> — The surrogate key at the time of the transaction (Type 2 key). Points to a specific historical version.</li>
+          <li><code>customer_id</code> — The natural/durable business key. Same for all versions of the same customer. Points to whichever row is current in the current view.</li>
+        </ul>
+      </li>
+    </ul>
+
+    <h3 style="color:#a3e635;">Two Queries, Two Answers from One Fact Table</h3>
+    <div class="arch">
+-- HISTORICAL VIEW: What city was the customer in when each order was placed?
+SELECT f.order_id, d.city, f.amount
+FROM fact_orders f
+JOIN dim_customer d ON f.customer_sk = d.customer_sk;
+-- Result: order 9001 → Mumbai, order 9002 → Delhi (historically accurate)
+
+-- CURRENT-STATE VIEW: Apply today's city to ALL historical orders
+SELECT f.order_id, v.city, f.amount
+FROM fact_orders f
+JOIN dim_customer_current_view v ON f.customer_id = v.customer_id;
+-- Result: ALL orders → Delhi (Alice's current city applied to all history)</div>
+
+    <h3 style="color:#a3e635;">Why Both Keys?</h3>
+    <ul>
+      <li><strong>Surrogate key (customer_sk)</strong> — Frozen at transaction time. Joining via this key always returns the dimension row that was active WHEN the fact row was created. Perfect for "what was the value at the time?"</li>
+      <li><strong>Natural key (customer_id)</strong> — The same ID across all versions. Joining via this key to the current view always returns TODAY's dimension row. Perfect for "what is the value now, across all history?"</li>
+      <li><strong>No data duplication</strong> — The dimension table itself is NOT duplicated. Only the fact table stores an extra key column. The overhead is minimal.</li>
+    </ul>
+
+    <h3 style="color:#a3e635;">Data Preserved?</h3>
+    <p>Yes — full history is preserved via the Type 2 surrogate key structure. Additionally, current state is always accessible via the natural key + current view. Best of both worlds.</p>
+    <h3 style="color:#a3e635;">When to Use</h3>
+    <p>When analysts need to run both historical reports ("what territory was this rep in when they made this sale?") AND current-state reports ("how many total sales has this rep made, using their current territory?") against the same fact table. Very common in sales, finance, and HR analytics.</p>
+  </div>
+
+  <!-- SCD DECISION GUIDE -->
+  <div class="dblock">
+    <h3 style="color:var(--blue);">⚡ SCD Decision Guide</h3>
+    <div class="cheat">
+      <div class="cheat-item"><div class="cheat-q">Value should NEVER change (DOB, original ID)</div><div class="cheat-a" style="color:var(--muted);">→ <strong>Type 0</strong> — Retain Original</div></div>
+      <div class="cheat-item"><div class="cheat-q">Fixing a mistake / history doesn't matter</div><div class="cheat-a" style="color:var(--blue);">→ <strong>Type 1</strong> — Overwrite</div></div>
+      <div class="cheat-item"><div class="cheat-q">Need full history — "what was it at the time?"</div><div class="cheat-a" style="color:var(--green);">→ <strong>Type 2</strong> — Add New Row ⭐ default</div></div>
+      <div class="cheat-item"><div class="cheat-q">Only need current vs. one-step-back comparison</div><div class="cheat-a" style="color:var(--orange);">→ <strong>Type 3</strong> — Add New Column</div></div>
+      <div class="cheat-item"><div class="cheat-q">Need fast current lookups + full audit history separately</div><div class="cheat-a" style="color:var(--purple);">→ <strong>Type 4</strong> — History Table</div></div>
+      <div class="cheat-item"><div class="cheat-q">Need full history AND always see current value in every row</div><div class="cheat-a" style="color:var(--red);">→ <strong>Type 6</strong> — Hybrid (1+2+3)</div></div>
+      <div class="cheat-item"><div class="cheat-q">Mix of slow + fast-changing attributes causing Type 2 row explosion</div><div class="cheat-a" style="color:#22d3ee;">→ <strong>Type 5</strong> — Mini-Dimension + Outrigger</div></div>
+      <div class="cheat-item"><div class="cheat-q">Need BOTH "value at transaction time" AND "current value today" from same fact table</div><div class="cheat-a" style="color:#a3e635;">→ <strong>Type 7</strong> — Dual Surrogate + Natural Key</div></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
      JAVASCRIPT
 ══════════════════════════════════════════ -->
 <script>
-  function show(id, btn) {
+  // Track which analytics sub-tab is active
+  var activeAnalyticsSub = 'scd';
+
+  function showMain(section, btn) {
+    // Update main buttons
+    document.querySelectorAll('.main-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const gcpBar       = document.getElementById('gcp-subtabbar');
+    const analyticsBar = document.getElementById('analytics-subtabbar');
+
+    if (section === 'gcp') {
+      // Show GCP sub-tabbar, hide analytics sub-tabbar
+      gcpBar.classList.remove('hidden');
+      analyticsBar.classList.add('hidden');
+      // Hide all standalones
+      document.querySelectorAll('.standalone').forEach(p => p.classList.remove('active'));
+      // Make sure the active GCP panel is visible (restore last active .panel)
+      const activePanel = document.querySelector('.panel.active');
+      if (!activePanel) {
+        // default to overview
+        document.getElementById('tab-overview').classList.add('active');
+        gcpBar.querySelector('.tab-btn').classList.add('active');
+      }
+    } else {
+      // Hide GCP sub-tabbar, show analytics sub-tabbar
+      gcpBar.classList.add('hidden');
+      analyticsBar.classList.remove('hidden');
+      // Hide all GCP panels
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      // Show the last active analytics sub
+      document.querySelectorAll('.standalone').forEach(p => p.classList.remove('active'));
+      document.getElementById('tab-' + activeAnalyticsSub).classList.add('active');
+    }
+
+    btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    window.scrollTo({ top: 0 });
+  }
+
+  function showSub(id, btn) {
+    // GCP sub-tabs
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#gcp-subtabbar .tab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('tab-' + id).classList.add('active');
     btn.classList.add('active');
-    // scroll active tab into view
+    btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    window.scrollTo({ top: 0 });
+  }
+
+  function showAnalytics(id, btn) {
+    // Analytics sub-tabs (SCD / SQL Ranking)
+    activeAnalyticsSub = id;
+    document.querySelectorAll('.standalone').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('#analytics-subtabbar .tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    btn.classList.add('active');
     btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
     window.scrollTo({ top: 0 });
   }
