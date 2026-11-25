@@ -2520,6 +2520,98 @@ FROM orders o
 INNER JOIN payments p ON o.customer_id = p.customer_id;</div>
   </div>
 
+  <!-- EXCEPT / MINUS DETAIL BLOCK -->
+  <div class="dblock" style="border-color:#f8717122;">
+    <h2 style="font-size:1.2rem;color:var(--red);margin-bottom:0.5rem;">🔴 EXCEPT / MINUS — Rows in first query NOT in second</h2>
+    <p class="tline">Returns rows from the FIRST query that do NOT appear in the SECOND query. Rows only in the second query are ignored. Removes duplicates automatically.</p>
+
+    <h3 style="color:var(--red);">Definition — word by word</h3>
+    <ul>
+      <li><strong>EXCEPT</strong> — The standard SQL keyword (SQL standard, ISO/ANSI). Used in PostgreSQL, SQL Server, BigQuery. Means "take away" — subtract the second result set from the first.</li>
+      <li><strong>MINUS</strong> — Oracle's proprietary keyword for the same operation. <code>EXCEPT</code> and <code>MINUS</code> do exactly the same thing — only the keyword differs depending on the database.</li>
+      <li><strong>"Returns rows in first query not in second"</strong> — Like mathematical set subtraction: A - B. If a row exists in query A but NOT in query B → it appears in the output. If a row exists in both A and B → it is excluded. If a row exists only in B → it is completely ignored.</li>
+      <li><strong>"Removes duplicates"</strong> — Like INTERSECT and UNION (without ALL), EXCEPT automatically deduplicates the output. Each unique qualifying row appears exactly once.</li>
+      <li><strong>Column names and data types must match</strong> — Same rule as all set operators: same number of columns, compatible data types, column names taken from the first query.</li>
+    </ul>
+
+    <h3 style="color:var(--red);">Database Support</h3>
+    <ul>
+      <li><strong>PostgreSQL</strong> — Uses <code>EXCEPT</code> ✓</li>
+      <li><strong>SQL Server</strong> — Uses <code>EXCEPT</code> ✓</li>
+      <li><strong>BigQuery</strong> — Uses <code>EXCEPT</code> ✓ (BigQuery supports EXCEPT but NOT INTERSECT)</li>
+      <li><strong>Oracle</strong> — Uses <code>MINUS</code> (Oracle does not support the word EXCEPT)</li>
+      <li><strong>MySQL</strong> — Uses <code>EXCEPT</code> from version 8.0.31+ (older MySQL: use LEFT JOIN workaround)</li>
+    </ul>
+
+    <h3 style="color:var(--red);">INTERSECT vs EXCEPT — The Key Difference</h3>
+    <div class="hbox" style="border-color:var(--red);">
+      <strong>INTERSECT</strong> → "What do BOTH have in common?" → rows in A AND B<br/>
+      <strong>EXCEPT/MINUS</strong> → "What does A have that B doesn't?" → rows in A but NOT in B<br/><br/>
+      Think of it like: INTERSECT = overlap zone of a Venn diagram. EXCEPT = the left-only zone of a Venn diagram.
+    </div>
+
+    <h3 style="color:var(--red);">Syntax</h3>
+    <div class="arch">
+-- Standard SQL (PostgreSQL, SQL Server, BigQuery):
+SELECT column_list
+FROM table1
+EXCEPT
+SELECT column_list
+FROM table2;
+
+-- Oracle:
+SELECT column_list
+FROM table1
+MINUS
+SELECT column_list
+FROM table2;</div>
+
+    <h3 style="color:var(--red);">Real-world Examples</h3>
+    <div class="arch">
+-- Example 1: Find customers who registered but NEVER placed an order
+SELECT customer_id FROM customers
+EXCEPT
+SELECT customer_id FROM orders;
+-- Returns: customer_ids in 'customers' that are NOT in 'orders'
+
+-- Example 2: Find products in catalog but NEVER sold
+SELECT product_id FROM products
+EXCEPT
+SELECT product_id FROM order_items;
+
+-- Example 3: Find employees who have NOT attended training
+SELECT emp_id FROM employees
+EXCEPT
+SELECT emp_id FROM training_attendance;
+
+-- Oracle equivalent of Example 1:
+SELECT customer_id FROM customers
+MINUS
+SELECT customer_id FROM orders;</div>
+
+    <h3 style="color:var(--red);">EXCEPT vs LEFT JOIN — Two ways to find "missing" rows</h3>
+    <div class="arch">
+-- Using EXCEPT (cleaner, declarative):
+SELECT customer_id FROM customers
+EXCEPT
+SELECT customer_id FROM orders;
+
+-- Using LEFT JOIN (more universal, works in older MySQL):
+SELECT c.customer_id
+FROM customers c
+LEFT JOIN orders o ON c.customer_id = o.customer_id
+WHERE o.customer_id IS NULL;
+-- Both return the same result: customers with no orders</div>
+
+    <h3 style="color:var(--red);">Important: Order matters for EXCEPT/MINUS</h3>
+    <div class="hbox" style="border-color:var(--orange);">
+      <strong>A EXCEPT B</strong> ≠ <strong>B EXCEPT A</strong><br/><br/>
+      A EXCEPT B = rows in A not in B<br/>
+      B EXCEPT A = rows in B not in A<br/><br/>
+      Unlike UNION and INTERSECT (which are commutative — order doesn't matter), EXCEPT is NOT commutative. The first query determines which set you are "subtracting from."
+    </div>
+  </div>
+
   <!-- ALL 4 SET OPERATORS DETAIL -->
   <div class="dblock">
     <h2 style="font-size:1.2rem;margin-bottom:1rem;">📖 All 4 Set Operators — Explained</h2>
