@@ -220,6 +220,7 @@
 <div class="tabbar hidden" id="analytics-subtabbar">
   <button class="tab-btn active" onclick="showAnalytics('scd',this)">📦 SCD Types</button>
   <button class="tab-btn" onclick="showAnalytics('ranking',this)">🏅 SQL Ranking</button>
+  <button class="tab-btn" onclick="showAnalytics('dbvsdw',this)">🗄️ DB vs Data Warehouse</button>
 </div>
 
 
@@ -1502,7 +1503,7 @@
 <div class="standalone" id="tab-scd">
   <div class="phdr">
     <h1 class="grad-orange">📦 Slowly Changing Dimensions (SCD)</h1>
-    <p>How to handle changes to dimension data in a data warehouse — Types 0, 1, 2, 3, 4, 6 explained</p>
+    <p>How to handle changes to dimension data in a data warehouse — Types 0, 1, 2, 3, 4, 5, 6, 7 explained</p>
   </div>
 
   <!-- ── IMAGE 6 TABLE (exact source) ── -->
@@ -2083,6 +2084,136 @@ JOIN dim_customer_current_view v ON f.customer_id = v.customer_id;
       <div class="cheat-item"><div class="cheat-q">Need full history AND always see current value in every row</div><div class="cheat-a" style="color:var(--red);">→ <strong>Type 6</strong> — Hybrid (1+2+3)</div></div>
       <div class="cheat-item"><div class="cheat-q">Mix of slow + fast-changing attributes causing Type 2 row explosion</div><div class="cheat-a" style="color:#22d3ee;">→ <strong>Type 5</strong> — Mini-Dimension + Outrigger</div></div>
       <div class="cheat-item"><div class="cheat-q">Need BOTH "value at transaction time" AND "current value today" from same fact table</div><div class="cheat-a" style="color:#a3e635;">→ <strong>Type 7</strong> — Dual Surrogate + Natural Key</div></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     TAB — DB vs DATA WAREHOUSE
+══════════════════════════════════════════ -->
+<div class="standalone" id="tab-dbvsdw">
+  <div class="phdr">
+    <h1 class="grad-blue">🗄️ Database vs Data Warehouse</h1>
+    <p>MySQL · PostgreSQL · SQL Server · MongoDB &nbsp;vs&nbsp; BigQuery · Snowflake · Redshift — every word explained</p>
+  </div>
+
+  <!-- FROM IMAGE 8 — EXACT TABLE -->
+  <h2 class="stitle" style="border-color:var(--blue);">📋 From Your Notes — Image Reference</h2>
+  <div class="twrap" style="margin-bottom:1.5rem;">
+    <table>
+      <thead><tr><th>Category</th><th>Tools / Examples</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong style="color:var(--blue);">Database</strong></td>
+          <td>
+            <span class="badge b-blue">MySQL</span>&nbsp;
+            <span class="badge b-blue">PostgreSQL</span>&nbsp;
+            <span class="badge b-blue">SQL Server</span>&nbsp;
+            <span class="badge b-purple">MongoDB</span>
+          </td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--green);">Data Warehouses</strong></td>
+          <td>
+            <span class="badge b-green">BigQuery</span>&nbsp;
+            <span class="badge b-orange">Snowflake</span>&nbsp;
+            <span class="badge b-red">Redshift</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- WHAT IS A DATABASE -->
+  <div class="dblock" style="border-color:#4f9cf922;">
+    <h2 style="font-size:1.3rem;margin-bottom:0.5rem;color:var(--blue);">🗃️ What is a Database?</h2>
+    <p class="tline">An organised collection of structured data managed by a DBMS. Designed for OLTP — fast, frequent, small reads and writes by live applications.</p>
+
+    <h3 style="color:var(--blue);">Definition — word by word</h3>
+    <ul>
+      <li><strong>Database</strong> — "Data" = information. "Base" = a foundation or store. A database is the persistent store that an application reads from and writes to, keeping data structured and consistent.</li>
+      <li><strong>DBMS</strong> = Database Management System — the software (MySQL, PostgreSQL) that sits between your application and the raw data files, handling querying, indexing, transactions, and access control.</li>
+      <li><strong>OLTP</strong> = Online Transaction Processing. "Online" = happening in real time, as users interact with the application. "Transaction" = a unit of work (e.g., one order placed, one payment processed). "Processing" = executing that work immediately.</li>
+      <li><strong>ACID</strong> = Atomicity (all-or-nothing), Consistency (data integrity always maintained), Isolation (concurrent transactions don't interfere), Durability (committed data survives crashes). Databases guarantee ACID for every transaction.</li>
+    </ul>
+
+    <h3 style="color:var(--blue);">Database Tools — Every Word</h3>
+    <ul>
+      <li>
+        <strong>MySQL</strong> — "My" = named after the daughter (Mya) of co-creator Michael Widenius. "SQL" = Structured Query Language. World's most popular open-source RDBMS (Relational Database Management System). Rows and columns, ACID transactions, foreign keys. Used by: Facebook (originally), Twitter, WordPress, YouTube. On GCP: managed as <strong>Cloud SQL for MySQL</strong>.
+      </li>
+      <li>
+        <strong>PostgreSQL</strong> — "Post" = successor to an older database called Ingres (also called POSTGRES historically, the "Post" means "coming after" Ingres). "GRES" = from Ingres. "SQL" added when it adopted the SQL standard. Often called "Postgres." Open-source, standards-compliant, feature-rich RDBMS. Supports JSON, arrays, full-text search, custom data types, window functions, stored procedures, extensions. Preferred by engineers for correctness and extensibility. On GCP: <strong>Cloud SQL for PostgreSQL</strong> or <strong>AlloyDB</strong>.
+      </li>
+      <li>
+        <strong>SQL Server</strong> — Full name: Microsoft SQL Server. Microsoft's commercial (proprietary, not open-source) RDBMS. "SQL" = Structured Query Language. "Server" = runs as a server process, not embedded. Used heavily in enterprise Windows environments, .NET applications, and legacy enterprise systems. Tight integration with Microsoft tools (Excel, Power BI, Azure Data Factory, SSRS, SSAS). On GCP: managed as <strong>Cloud SQL for SQL Server</strong>.
+      </li>
+      <li>
+        <strong>MongoDB</strong> — "Mongo" = from "humongous" (designed for huge datasets that don't fit in traditional relational structures). A NoSQL document database. "Document" = data stored as BSON (Binary JSON) documents — like JSON objects with field-value pairs, nested objects, and arrays. "Schema-less" = each document in a collection can have completely different fields. No JOIN operations (joins are done in application code or with $lookup pipeline). Scales horizontally (sharding). Used for: content management, user profiles, catalogs, real-time personalisation. On GCP: use MongoDB Atlas (available on GCP Marketplace) or <strong>Firestore</strong> as the native equivalent.
+      </li>
+    </ul>
+  </div>
+
+  <!-- WHAT IS A DATA WAREHOUSE -->
+  <div class="dblock" style="border-color:#3ecf8e22;">
+    <h2 style="font-size:1.3rem;margin-bottom:0.5rem;color:var(--green);">🏭 What is a Data Warehouse?</h2>
+    <p class="tline">A centralised repository for large volumes of historical, structured data from multiple source systems, optimised for complex analytical queries and BI reporting. OLAP workloads. SCD types apply here.</p>
+
+    <h3 style="color:var(--green);">Definition — word by word</h3>
+    <ul>
+      <li><strong>Data Warehouse</strong> — "Data" = information. "Warehouse" = a large storage facility. A data warehouse stores data from many different source systems (databases, SaaS tools, event streams) in one place for analysis. Like a physical warehouse that receives goods from multiple suppliers and stores them for distribution.</li>
+      <li><strong>Centralised</strong> — All analytical data lives in one system. No need to query 10 different databases — analysts query one warehouse. Single source of truth.</li>
+      <li><strong>Historical</strong> — Data warehouses keep ALL historical data, not just the current state. 5 years of transaction history, not just today's records. This is WHY SCD types exist — to handle how dimension values change over that historical period.</li>
+      <li><strong>OLAP</strong> = Online Analytical Processing. "Online" = interactive queries. "Analytical" = complex queries scanning large amounts of data for insights (not updating a row). "Processing" = computing aggregations, trends, comparisons across millions of rows.</li>
+      <li><strong>Star schema</strong> — A data warehouse design pattern. One central <strong>fact table</strong> (stores measurements/events like orders, transactions) surrounded by <strong>dimension tables</strong> (descriptive context like Customer, Product, Date, Location). The shape looks like a star. SCD types determine how dimension tables handle changes.</li>
+      <li><strong>Snowflake schema</strong> — A variation of star schema where dimension tables are further normalised (split into sub-dimensions). More normalised = less redundancy but more JOINs. The shape looks like a snowflake.</li>
+    </ul>
+
+    <h3 style="color:var(--green);">Data Warehouse Tools — Every Word</h3>
+    <ul>
+      <li>
+        <strong>BigQuery</strong> — Google Cloud's fully managed, serverless data warehouse. "Big" = designed for big data at petabyte scale. "Query" = its primary purpose is querying (not operational transactions). No cluster to manage — write SQL and BigQuery distributes across thousands of internal nodes automatically. <strong>Columnar storage</strong> (Capacitor format) = data stored column-by-column, not row-by-row → analytics that read a few columns from billions of rows are fast and cheap. <strong>Separates storage from compute</strong> = you pay for storage separately from query execution. Pay per TB scanned (on-demand) or per slot reservation (capacity pricing). Native integration with Dataflow, Datastream, Pub/Sub, Looker. The primary data warehouse on GCP.
+      </li>
+      <li>
+        <strong>Snowflake</strong> — A cloud-native data warehouse available on AWS, GCP, and Azure. Named after its unique architecture — like a snowflake, intricate and unlike any other. Key innovation: <strong>three-layer architecture</strong> — (1) Storage layer (data files in S3/GCS/Azure Blob), (2) Compute layer (virtual warehouses — independent clusters that execute queries), (3) Cloud services layer (metadata, query optimisation, security, access control). Each layer scales independently. <strong>Auto-suspend</strong> = virtual warehouses pause automatically when idle → you don't pay for idle compute. <strong>Multi-cluster shared data</strong> = multiple compute clusters can query the same data simultaneously without contention. Supports <strong>VARIANT</strong> data type for semi-structured data (JSON, Avro, Parquet) natively. Very popular in multi-cloud organisations. Direct BigQuery competitor.
+      </li>
+      <li>
+        <strong>Redshift</strong> — Amazon Web Services (AWS) data warehouse. "Red" = Amazon's brand colour (the Amazon logo arrow/smile is red). "Shift" = shifting massive data workloads to the cloud. A <strong>columnar MPP</strong> (Massively Parallel Processing) data warehouse. Architecture: <strong>Leader node</strong> (receives queries from clients, parses, creates execution plan, coordinates results) + <strong>Compute nodes</strong> (execute the query in parallel, each holding a slice of data). Data is stored on the compute nodes (storage and compute are coupled — unlike Snowflake/BigQuery). <strong>Redshift Serverless</strong> = newer option, no cluster management. Tight AWS ecosystem integration: S3, AWS Glue (ETL), AWS Lambda (triggers), QuickSight (BI). Main competitor to BigQuery and Snowflake, but AWS-native.
+      </li>
+    </ul>
+  </div>
+
+  <!-- COMPARISON TABLE -->
+  <div class="dblock">
+    <h3 style="color:var(--orange);">⚡ Database vs Data Warehouse — Full Comparison</h3>
+    <div class="twrap" style="margin-bottom:0;">
+      <table>
+        <thead>
+          <tr>
+            <th>Dimension</th>
+            <th style="color:var(--blue);">Database (OLTP)</th>
+            <th style="color:var(--green);">Data Warehouse (OLAP)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Purpose</strong></td><td>Run the application</td><td>Analyse the business</td></tr>
+          <tr><td><strong>Query type</strong></td><td>Many small, fast queries</td><td>Few large, complex queries</td></tr>
+          <tr><td><strong>Data freshness</strong></td><td>Real-time / live</td><td>Periodic loads (hourly, daily)</td></tr>
+          <tr><td><strong>Data volume</strong></td><td>GBs to TBs</td><td>TBs to PBs</td></tr>
+          <tr><td><strong>Users</strong></td><td>Application code, end users</td><td>Analysts, data scientists, BI tools</td></tr>
+          <tr><td><strong>Storage format</strong></td><td>Row-based (fast single-row writes)</td><td>Columnar (fast multi-row scans)</td></tr>
+          <tr><td><strong>Updates</strong></td><td>Frequent INSERT / UPDATE / DELETE</td><td>Bulk loads; append-only or rare updates</td></tr>
+          <tr><td><strong>Schema</strong></td><td>Normalised (3NF) to avoid redundancy</td><td>Denormalised (Star/Snowflake) for query speed</td></tr>
+          <tr><td><strong>Concurrency</strong></td><td>Thousands of simultaneous small transactions</td><td>Tens to hundreds of large analytical queries</td></tr>
+          <tr><td><strong>SCD types apply?</strong></td><td><span class="badge b-red">No — always current state</span></td><td><span class="badge b-green">Yes — dimensions change slowly over time</span></td></tr>
+          <tr><td><strong>Examples</strong></td><td>MySQL, PostgreSQL, SQL Server, MongoDB</td><td>BigQuery, Snowflake, Redshift</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="hbox" style="border-color:var(--orange);margin-top:1rem;">
+      <strong>The connection to SCD:</strong> SCD types (0–7) only matter in a <strong>data warehouse</strong>. When an operational database (MySQL) updates a customer's city, your ETL pipeline moves that change into the warehouse — and THEN the SCD type determines whether you overwrite (Type 1), add a new row (Type 2), or use another strategy. Databases are the source; warehouses are where SCD logic is applied.
     </div>
   </div>
 </div>
